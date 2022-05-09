@@ -79,11 +79,10 @@ class BayesianLinear(hk.Module):
     def __call__(
         self,
         inputs: jnp.ndarray,
+        sample: bool,
         precision: Optional[lax.Precision] = None,
     ) -> Tuple[jnp.ndarray, LSTMState]:
 
-        # Add input sample: bool and write if sample_weights: self.weights = self.sample_weights(..)
-        # This is passed in __call()__ of deepRNN
         # Initialize parameters
         input_size = self.input_size = inputs.shape[-1]
         output_size = self.hidden_size
@@ -97,17 +96,18 @@ class BayesianLinear(hk.Module):
         w_rho = hk.get_parameter(f"w_rho_{self.name}", [input_size, output_size], dtype, init=rho_init)
 
         # Sample variational weights
-        weights = self.sample_weights(mu=w_mu, rho=w_rho)
+        if sample:
+            self.weights = self.sample_weights(mu=w_mu, rho=w_rho)
 
         # Compute log posterior and log prior for KL divergence
         variational_posterior_w = self.VariationalGaussianPosterior(
             mu=w_mu,
             rho=w_rho
         )
-        self.log_posterior = variational_posterior_w.log_prob(weights).sum()
-        self.log_prior = self.prior.log_prob(weights).sum()
+        self.log_posterior = variational_posterior_w.log_prob(self.weights).sum()
+        self.log_prior = self.prior.log_prob(self.weights).sum()
 
-        out = jnp.dot(inputs, weights, precision=precision)
+        out = jnp.dot(inputs, self.weights, precision=precision)
 
         if self.with_bias:
             b_init_mu = hk.initializers.TruncatedNormal(stddev=stddev)
@@ -116,14 +116,15 @@ class BayesianLinear(hk.Module):
             b_mu = jnp.broadcast_to(b_mu, out.shape)
             b_rho = hk.get_parameter(f"b_rho_{self.name}", [output_size], dtype, init=b_init_rho)
             b_rho = jnp.broadcast_to(b_rho, out.shape)
-            bias = self.sample_weights(mu=b_mu, rho=b_rho)
-            out = out + bias
+            if sample:
+                self.bias = self.sample_weights(mu=b_mu, rho=b_rho)
+            out = out + self.bias
             variational_posterior_b = self.VariationalGaussianPosterior(
                 mu=b_mu,
                 rho=b_rho
             )
-            self.log_posterior += variational_posterior_b.log_prob(bias).sum()
-            self.log_prior += self.prior.log_prob(bias).sum()
+            self.log_posterior += variational_posterior_b.log_prob(self.bias).sum()
+            self.log_prior += self.prior.log_prob(self.bias).sum()
 
         return out
 
@@ -197,6 +198,7 @@ class BayesianLSTM(RNNCore):
         self,
         inputs: jnp.ndarray,
         prev_state: LSTMState,
+        sample: bool,
         precision: Optional[lax.Precision] = None,
     ) -> Tuple[jnp.ndarray, LSTMState]:
 
@@ -215,17 +217,18 @@ class BayesianLSTM(RNNCore):
         w_rho = hk.get_parameter(f"w_rho_{self.name}", [input_size, output_size], dtype, init=rho_init)
 
         # Sample variational weights
-        weights = self.sample_weights(mu=w_mu, rho=w_rho)
+        if sample:
+            self.weights = self.sample_weights(mu=w_mu, rho=w_rho)
 
         # Compute log posterior and log prior for KL divergence
         variational_posterior_w = self.VariationalGaussianPosterior(
             mu=w_mu,
             rho=w_rho
         )
-        self.log_posterior = variational_posterior_w.log_prob(weights).sum()
-        self.log_prior = self.prior.log_prob(weights).sum()
+        self.log_posterior = variational_posterior_w.log_prob(self.weights).sum()
+        self.log_prior = self.prior.log_prob(self.weights).sum()
 
-        gated = jnp.dot(x_and_h, weights, precision=precision)
+        gated = jnp.dot(x_and_h, self.weights, precision=precision)
 
         if self.with_bias:
             b_init_mu = hk.initializers.TruncatedNormal(stddev=stddev)
@@ -234,14 +237,15 @@ class BayesianLSTM(RNNCore):
             b_mu = jnp.broadcast_to(b_mu, gated.shape)
             b_rho = hk.get_parameter(f"b_rho_{self.name}", [output_size], dtype, init=b_init_rho)
             b_rho = jnp.broadcast_to(b_rho, gated.shape)
-            bias = self.sample_weights(mu=b_mu, rho=b_rho)
-            gated = gated + bias
+            if sample:
+                self.bias = self.sample_weights(mu=b_mu, rho=b_rho)
+            gated = gated + self.bias
             variational_posterior_b = self.VariationalGaussianPosterior(
                 mu=b_mu,
                 rho=b_rho
             )
-            self.log_posterior += variational_posterior_b.log_prob(bias).sum()
-            self.log_prior += self.prior.log_prob(bias).sum()
+            self.log_posterior += variational_posterior_b.log_prob(self.bias).sum()
+            self.log_prior += self.prior.log_prob(self.bias).sum()
 
         # Compute hidden states as in LSTM
         i, g, f, o = jnp.split(gated, indices_or_sections=4, axis=-1)
@@ -271,7 +275,7 @@ class BayesianDeepRNN(RNNCore):
         super().__init__(name=name)
         self.layers = layers
 
-    def __call__(self, inputs, state):
+    def __call__(self, inputs, state, sample):
         current_inputs = inputs
         next_states = []
         outputs = []
@@ -280,7 +284,7 @@ class BayesianDeepRNN(RNNCore):
         log_prior = 0
         for layer in self.layers:
             if isinstance(layer, RNNCore):
-                current_inputs, next_state = layer(current_inputs, state[state_idx])
+                current_inputs, next_state = layer(current_inputs, state[state_idx], sample)
                 outputs.append(current_inputs)
                 next_states.append(next_state)
                 state_idx += 1
@@ -288,11 +292,11 @@ class BayesianDeepRNN(RNNCore):
                 log_prior += layer.log_prior
             elif isinstance(layer, hk.Module):
                 if layer.name == 'bayesian_out_mean_linear_layer':
-                    out_mean = layer(current_inputs)
+                    out_mean = layer(current_inputs, sample)
                     log_posterior += layer.log_posterior
                     log_prior += layer.log_prior
                 elif layer.name == 'bayesian_out_rho_linear_layer':
-                    out_rho = layer(current_inputs)
+                    out_rho = layer(current_inputs, sample)
                     log_posterior += layer.log_posterior
                     log_prior += layer.log_prior
                 else:
@@ -380,12 +384,6 @@ class BayesianDeepLSTM():
         batch_size = obs.shape[0]
         initial_state = net.initial_state(batch_size)
         means, rhos, states, log_posterior, log_prior = bayesian_static_unroll(net, obs, initial_state)
-
-        # Collect log posterior and log prior for KL divergence.
-        # Current implementation may have a bug. 
-        # bayesian_static_unroll calls net multiple times (T timestep times in scan)
-        # At every call, BayesianLSTM sample new weights, but weights should be sampled only for a new minibatch.
-        # not sure if this higher stochasticity negatively affects the results
         return means, rhos, states, log_posterior, log_prior
 
     def forward(self, obs:jnp.ndarray):
@@ -434,7 +432,10 @@ def bayesian_static_unroll(core, input_sequence, initial_state):
     state = initial_state
     for t in range(num_steps):
         inputs = jax.tree_map(lambda x, _t=t: x[:, _t], input_sequence)
-        means, rhos, state, log_posterior, log_prior = core(inputs, state)
+        if t==0: # sample fresh parameters for a new mini-batch
+            means, rhos, state, log_posterior, log_prior = core(inputs, state, sample=True)
+        else:
+            means, rhos, state, log_posterior, log_prior = core(inputs, state, sample=False)
         means_sequence.append(means)
         rhos_sequence.append(rhos)
         log_posterior_sequence.append(log_posterior)
