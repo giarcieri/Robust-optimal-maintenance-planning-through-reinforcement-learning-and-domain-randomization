@@ -1,0 +1,10 @@
+theano-pymc==1.1.2
+pymc3==3.11.3
+arviz==0.11.4
+jax==0.2.25
+numpyro==0.8.0
+jupyter==1.0.0
+gym==0.23.1
+dm-haiku==0.0.7.dev0
+numpy==1.21.2
+optax==0.1.2
