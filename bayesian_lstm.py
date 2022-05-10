@@ -88,11 +88,13 @@ class BayesianLinear(hk.Module):
         output_size = self.hidden_size
         dtype = inputs.dtype
 
-        stddev = 1. / jnp.sqrt(self.input_size)
-        mean_init = hk.initializers.TruncatedNormal(stddev=stddev)
+        std_mu_init = 0.1
+        std_rho_init = 1.
+        mean_mu_init = 0.
+        mean_init = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
         w_mu = hk.get_parameter(f"w_mu_{self.name}", [input_size, output_size], dtype, init=mean_init)
 
-        rho_init = hk.initializers.TruncatedNormal(stddev=stddev)
+        rho_init = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
         w_rho = hk.get_parameter(f"w_rho_{self.name}", [input_size, output_size], dtype, init=rho_init)
 
         # Sample variational weights
@@ -110,8 +112,8 @@ class BayesianLinear(hk.Module):
         out = jnp.dot(inputs, self.weights, precision=precision)
 
         if self.with_bias:
-            b_init_mu = hk.initializers.TruncatedNormal(stddev=stddev)
-            b_init_rho = hk.initializers.TruncatedNormal(stddev=stddev)
+            b_init_mu = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
+            b_init_rho = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
             b_mu = hk.get_parameter(f"b_mu_{self.name}", [output_size], dtype, init=b_init_mu)
             b_mu = jnp.broadcast_to(b_mu, out.shape)
             b_rho = hk.get_parameter(f"b_rho_{self.name}", [output_size], dtype, init=b_init_rho)
@@ -209,11 +211,14 @@ class BayesianLSTM(RNNCore):
         output_size = 4 * self.hidden_size
         dtype = x_and_h.dtype
 
-        stddev = 1. / jnp.sqrt(self.input_size)
-        mean_init = hk.initializers.TruncatedNormal(stddev=stddev)
+        std_mu_init = 0.1
+        std_rho_init = 1.
+        mean_mu_init = 0.
+
+        mean_init = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
         w_mu = hk.get_parameter(f"w_mu_{self.name}", [input_size, output_size], dtype, init=mean_init)
 
-        rho_init = hk.initializers.TruncatedNormal(stddev=stddev)
+        rho_init = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
         w_rho = hk.get_parameter(f"w_rho_{self.name}", [input_size, output_size], dtype, init=rho_init)
 
         # Sample variational weights
@@ -231,8 +236,8 @@ class BayesianLSTM(RNNCore):
         gated = jnp.dot(x_and_h, self.weights, precision=precision)
 
         if self.with_bias:
-            b_init_mu = hk.initializers.TruncatedNormal(stddev=stddev)
-            b_init_rho = hk.initializers.TruncatedNormal(stddev=stddev)
+            b_init_mu = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
+            b_init_rho = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
             b_mu = hk.get_parameter(f"b_mu_{self.name}", [output_size], dtype, init=b_init_mu)
             b_mu = jnp.broadcast_to(b_mu, gated.shape)
             b_rho = hk.get_parameter(f"b_rho_{self.name}", [output_size], dtype, init=b_init_rho)
@@ -260,6 +265,32 @@ class BayesianLSTM(RNNCore):
         if batch_size is not None:
             state = add_batch(state, batch_size)
         return state
+
+class BayesianLSTM_Sharpening(BayesianLSTM):
+    """
+    Bayesian LSTM layer with posterior sharpening (Fortunato et al., 2017).
+    """
+    def __init__(
+        self, 
+        hidden_size: int, 
+        mu_0_prior: jnp.ndarray, 
+        sigma_0_prior: jnp.ndarray, 
+        mu_1_prior: jnp.ndarray, 
+        sigma_1_prior: jnp.ndarray, 
+        pi_prior: jnp.ndarray, 
+        sigma_0_sharpen: jnp.ndarray,
+        with_bias: bool = True, 
+        name: Optional[str] = None
+    ):
+        super().__init__(hidden_size, mu_0_prior, sigma_0_prior, mu_1_prior, sigma_1_prior, pi_prior, with_bias, name)
+
+        self.sigma_0_sharpen = sigma_0_sharpen
+        self.sharpen = True
+
+    def sharpening(
+        self, 
+    ):
+        raise NotImplementedError
 
 class BayesianDeepRNN(RNNCore):
     """
@@ -393,10 +424,10 @@ class BayesianDeepLSTM():
 
     def predict_posterior(self, obs:jnp.ndarray, n_samples: int = 100):
         """Predict a full posterior distribution. Implement a method that parallelize over n_samples"""
-        # maybe 
-        # obs = obs.reshape(n_samples, obs.shape)
-        # return jax.vmap(forward, in_axes=(0,), out_axes=0)(obs)
-        raise NotImplementedError
+        ### TODO: current implementation is wrong because it will not produce different samples because of rng_key. 
+        obs = jnp.stack([obs]*n_samples)
+        post_means, post_sigmas, _, _ = jax.vmap(self.forward, in_axes=(0,), out_axes=0)(obs)
+        return post_means, post_sigmas
 
 def bayesian_static_unroll(core, input_sequence, initial_state):
     """Performs a static unroll of an RNN.
