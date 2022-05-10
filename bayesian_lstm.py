@@ -91,10 +91,11 @@ class BayesianLinear(hk.Module):
         std_mu_init = 0.1
         std_rho_init = 1.
         mean_mu_init = 0.
+        mean_rho_init = - 6.
         mean_init = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
         w_mu = hk.get_parameter(f"w_mu_{self.name}", [input_size, output_size], dtype, init=mean_init)
 
-        rho_init = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
+        rho_init = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_rho_init)
         w_rho = hk.get_parameter(f"w_rho_{self.name}", [input_size, output_size], dtype, init=rho_init)
 
         # Sample variational weights
@@ -113,7 +114,7 @@ class BayesianLinear(hk.Module):
 
         if self.with_bias:
             b_init_mu = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
-            b_init_rho = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
+            b_init_rho = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_rho_init)
             b_mu = hk.get_parameter(f"b_mu_{self.name}", [output_size], dtype, init=b_init_mu)
             b_mu = jnp.broadcast_to(b_mu, out.shape)
             b_rho = hk.get_parameter(f"b_rho_{self.name}", [output_size], dtype, init=b_init_rho)
@@ -209,16 +210,17 @@ class BayesianLSTM(RNNCore):
         # Initialize parameters
         input_size = self.input_size = x_and_h.shape[-1]
         output_size = 4 * self.hidden_size
-        dtype = x_and_h.dtype
+        dtype = self.dtype = x_and_h.dtype
 
         std_mu_init = 0.1
         std_rho_init = 1.
         mean_mu_init = 0.
+        mean_rho_init = - 6.
 
         mean_init = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
         w_mu = hk.get_parameter(f"w_mu_{self.name}", [input_size, output_size], dtype, init=mean_init)
 
-        rho_init = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
+        rho_init = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_rho_init)
         w_rho = hk.get_parameter(f"w_rho_{self.name}", [input_size, output_size], dtype, init=rho_init)
 
         # Sample variational weights
@@ -237,7 +239,7 @@ class BayesianLSTM(RNNCore):
 
         if self.with_bias:
             b_init_mu = hk.initializers.TruncatedNormal(stddev=std_mu_init, mean=mean_mu_init)
-            b_init_rho = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_mu_init)
+            b_init_rho = hk.initializers.TruncatedNormal(stddev=std_rho_init, mean=mean_rho_init)
             b_mu = hk.get_parameter(f"b_mu_{self.name}", [output_size], dtype, init=b_init_mu)
             b_mu = jnp.broadcast_to(b_mu, gated.shape)
             b_rho = hk.get_parameter(f"b_rho_{self.name}", [output_size], dtype, init=b_init_rho)
@@ -268,7 +270,7 @@ class BayesianLSTM(RNNCore):
 
 class BayesianLSTM_Sharpening(BayesianLSTM):
     """
-    Bayesian LSTM layer with posterior sharpening (Fortunato et al., 2017).
+    Bayesian LSTM layer with posterior sharpening (Fortunato et al., 2017). Not yet implemented.
     """
     def __init__(
         self, 
@@ -278,7 +280,7 @@ class BayesianLSTM_Sharpening(BayesianLSTM):
         mu_1_prior: jnp.ndarray, 
         sigma_1_prior: jnp.ndarray, 
         pi_prior: jnp.ndarray, 
-        sigma_0_sharpen: jnp.ndarray,
+        sigma_0_sharpen: jnp.ndarray = 0.1,
         with_bias: bool = True, 
         name: Optional[str] = None
     ):
@@ -289,8 +291,21 @@ class BayesianLSTM_Sharpening(BayesianLSTM):
 
     def sharpening(
         self, 
+        grads_mu_sigma,
     ):
-        raise NotImplementedError
+        std_eta_init = 0.1
+        mean_eta_init = 0.
+
+        input_size = self.input_size
+        output_size = 4 * self.hidden_size
+
+        eta_init = hk.initializers.TruncatedNormal(stddev=std_eta_init, mean=mean_eta_init)
+        w_eta = hk.get_parameter(f"w_eta_{self.name}", [input_size, output_size], self.dtype, init=eta_init)
+        w_mu = self.weights - w_eta*grads_mu_sigma
+        normal_samples = jax.random.normal(hk.next_rng_key(), w_mu.shape)
+        self.weights = w_mu + normal_samples * self.sigma_0_sharpen
+
+    
 
 class BayesianDeepRNN(RNNCore):
     """
