@@ -7,7 +7,7 @@ from jax import numpy as jnp
 from typing import Any, Iterator, Iterable, Generator, Mapping, Tuple, NamedTuple, Sequence, Optional
 from jax import lax
 from haiku import LSTMState, RNNCore
-from haiku._src.recurrent import add_batch, _swap_batch_time, inside_transform
+from haiku._src.recurrent import add_batch
 from collections import namedtuple
 
 class BayesianLinear(hk.Module): 
