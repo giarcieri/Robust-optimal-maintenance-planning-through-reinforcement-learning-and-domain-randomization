@@ -1,6 +1,8 @@
 """
-Implementation of stable transformer XL https://arxiv.org/pdf/1910.06764.pdf. Much of this code comes from
-the torch implementation https://github.com/alantess/gtrxl-torch/blob/main/gtrxl_torch/gtrxl_torch.py.
+Implementation of stable transformer XL https://arxiv.org/pdf/1910.06764.pdf. Some of this code comes from
+the torch implementations: 
+- https://github.com/alantess/gtrxl-torch/blob/main/gtrxl_torch/gtrxl_torch.py.
+- https://github.com/dhruvramani/Transformers-RL
 """
 
 import haiku as hk
@@ -46,7 +48,7 @@ class GRUGate(hk.Module):
 
 class PositionalEncoding(hk.Module):
     """
-    Taken from https://github.com/alantess/gtrxl-torch/blob/main/gtrxl_torch/gtrxl_torch.py
+    Stolen from https://github.com/alantess/gtrxl-torch/blob/main/gtrxl_torch/gtrxl_torch.py
     """
     def __init__(self, d_model, dropout=0.1, max_len=1024):
         super(PositionalEncoding, self).__init__()
