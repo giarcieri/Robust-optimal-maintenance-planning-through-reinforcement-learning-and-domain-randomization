@@ -60,13 +60,27 @@ class PositionalEncoding(hk.Module):
         pe[:, 0::2] = np.sin(position * div_term)
         pe[:, 1::2] = np.cos(position * div_term)
         pe = np.expand_dims(pe, 0)
-        pe = np.swapaxes(pe, 0, 1)
+        #pe = np.swapaxes(pe, 0, 1)
         #pe = pe.unsqueeze(0).transpose(0, 1)
         self.pe = jnp.asarray(pe)
 
     def __call__(self, x):
-        x = x + self.pe[:x.shape[0], :]
+        x = x + self.pe[:, :x.shape[1], :]
         return hk.dropout(rng=hk.next_rng_key(), rate= self.dropout, x=x)
+
+class _PositionalEncoding(hk.Module):
+    def __init__(self, dim):
+        super(_PositionalEncoding, self).__init__()
+
+        self.dim = dim
+
+        inv_freq = 1 / (10000 ** (jnp.arange(0.0, dim, 2.0) / dim))
+        self.inv_freq = inv_freq
+
+    def __call__(self, pos_seq):
+        sinusoid_inp = jnp.outer(pos_seq, self.inv_freq)
+        pos_emb = jnp.concatenate([jnp.sin(sinusoid_inp), jnp.cos(sinusoid_inp)], axis=-1)
+        return pos_emb[None, :, :]
 
 class GTrXLCore(hk.Module):
     """ 
@@ -83,7 +97,8 @@ class GTrXLCore(hk.Module):
     ):
         super().__init__()
         #model_dimension = num_heads*key_size
-        self.positional_encoding = PositionalEncoding(d_model=model_dimension, dropout=dropout, max_len=max_len)
+        #self.positional_encoding = PositionalEncoding(d_model=model_dimension, dropout=dropout, max_len=max_len)
+        #self.positional_encoding = PositionalEncoding(dim=model_dimension)
         self.layernorm1 = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True) ### axis = [-ax, -ax-1, ...]
         self.layernorm2 = hk.LayerNorm(axis=-1, create_scale=True, create_offset=True)
         self.mha = hk.MultiHeadAttention(num_heads=num_heads, key_size=key_size, w_init_scale=1)
@@ -94,12 +109,12 @@ class GTrXLCore(hk.Module):
 
     def __call__(
         self,
-        x
+        e_prev
     ):
-        x_pos = self.positional_encoding(x)
-        x_norm = self.layernorm1(x_pos)
-        y_bar = self.mha(x_norm, x_norm, x_norm)
-        y = self.gated_mha(x, jax.nn.relu(y_bar))
+        #e_prev = self.positional_encoding(x)
+        e_tilde_prev_norm = self.layernorm1(e_prev)
+        y_bar = self.mha(e_tilde_prev_norm, e_tilde_prev_norm, e_tilde_prev_norm)
+        y = self.gated_mha(e_prev, jax.nn.relu(y_bar))
         e_bar = self.mlp(self.layernorm2(y))
         e = self.gated_mlp(y, jax.nn.relu(e_bar))
         return e
@@ -127,17 +142,19 @@ class GTrXL():
         self.max_len  = max_len 
         self.hidden_sizes_mlp = hidden_sizes_mlp
         self.output_size = output_size
+        #self.positional_encoding = PositionalEncoding(dim=model_dimension)
+        self.positional_encoding = PositionalEncoding(d_model=model_dimension, dropout=dropout, max_len=max_len)
 
     def forward(
         self,
         x
-    ):
+    ):  
+        e = self.positional_encoding(x)
         for layer in range(self.num_layers):
-            x = GTrXLCore(model_dimension=self.model_dimension, num_heads=self.num_heads, key_size=self.key_size, dropout=self.dropout, 
-                          max_len=self.max_len, hidden_sizes_mlp=self.hidden_sizes_mlp)(x)
-        x = hk.Linear(output_size=self.output_size)(x) ### I haven't figured out yet if this is needed or one can just set model_dimension=output_size
-
-        return x[:, -1, :]
+            e = GTrXLCore(model_dimension=self.model_dimension, num_heads=self.num_heads, key_size=self.key_size, dropout=self.dropout, 
+                          max_len=self.max_len, hidden_sizes_mlp=self.hidden_sizes_mlp)(e)
+        e = hk.Linear(output_size=self.output_size)(e) ### I haven't figured out yet if this is needed or one can just set model_dimension=output_size
+        return e[:, -1, :]
 
 GTrXLApply = namedtuple(
     'GTrXLApply',
