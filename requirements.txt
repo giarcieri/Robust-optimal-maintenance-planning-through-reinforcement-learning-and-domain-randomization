@@ -5,6 +5,7 @@ jax==0.2.25
 numpyro==0.8.0
 jupyter==1.0.0
 gym==0.23.1
-dm-haiku==0.0.7.dev0
+dm-haiku==0.0.6
 numpy==1.21.2
 optax==0.1.2
+jaxlib==0.3.7
