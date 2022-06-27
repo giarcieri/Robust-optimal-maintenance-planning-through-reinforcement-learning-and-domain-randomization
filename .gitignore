@@ -131,4 +131,5 @@ dmypy.json
 # files 
 example_data.csv
 hmm_AR_k_Tstud.py
+fractal_env.py
 *.ipynb
