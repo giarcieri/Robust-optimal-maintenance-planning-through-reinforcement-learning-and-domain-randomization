@@ -4,7 +4,6 @@ the torch implementation:
 - https://github.com/dhruvramani/Transformers-RL
 """
 
-from turtle import end_fill
 import haiku as hk
 import jax
 
@@ -312,13 +311,14 @@ class GTrXL():
         prev_seq = memory[0].shape[1]
 
         # dec_attn_mask = [curr x curr + prev x 1] 
+        # if jnp instead of np here -> ConcretizationTypeError when jitted
         dec_attn_mask = (
-            jnp.triu(
-                jnp.ones((cur_seq, cur_seq + prev_seq)),
+            np.triu(
+                np.ones((cur_seq, cur_seq + prev_seq)),
                 k=1 + prev_seq,
             ).astype(bool)[..., None]
         )
-        #dec_attn_mask = jnp.zeros((cur_seq, cur_seq + prev_seq, 1))
+        #dec_attn_mask = None # still to understand if mask makes any difference
 
         pos_ips = jnp.arange(cur_seq + prev_seq - 1, -1, -1.0, dtype=jnp.float32)
         # pos_embs = [curr + prev x 1 x d_input]
