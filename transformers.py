@@ -244,6 +244,7 @@ class GTrXL():
         dropout: float = 0.1,
         hidden_sizes_mlp: Iterable[int] = [],
         dropouta: float = 0.0,
+        output_dimension: int = 1
     ):
         self.model_dimension = model_dimension
         self.num_heads = num_heads 
@@ -252,6 +253,7 @@ class GTrXL():
         self.dropout = dropout
         self.hidden_sizes_mlp = hidden_sizes_mlp
         self.dropouta = dropouta
+        self.output_dimension = output_dimension
         self.positional_encoding = PositionalEncoding(dim=model_dimension)
 
         init = hk.initializers.TruncatedNormal(stddev=0.1, mean=0.)
@@ -340,10 +342,12 @@ class GTrXL():
             )
             hidden_states.append(layer_out)
 
+        preds = hk.Linear(self.output_dimension, name="output_layer")(layer_out)
+
         # Memory is treated as a const., don't propagate through it
         # new_memory = [[B x T x d_inner] x num_layers+1]
         memory = self.update_memory(memory, hidden_states)
-        return {"outs": layer_out, "memory": memory}
+        return {"preds": preds, "trans_state": layer_out, "memory": memory}
 
 
 GTrXLApply = namedtuple(
@@ -351,8 +355,8 @@ GTrXLApply = namedtuple(
     ['forward']
 )
 
-def apply_GTrXL(model_dimension, num_heads, key_size, num_layers, dropout, hidden_sizes_mlp):
-  transformer = GTrXL(model_dimension, num_heads, key_size, num_layers, dropout, hidden_sizes_mlp)
+def apply_GTrXL(model_dimension, num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, output_dimension):
+  transformer = GTrXL(model_dimension, num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, output_dimension)
   def init(x):
     return transformer.forward(x)
 

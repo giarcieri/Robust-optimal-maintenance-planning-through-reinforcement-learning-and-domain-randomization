@@ -9,3 +9,4 @@ dm-haiku==0.0.6
 numpy==1.21.2
 optax==0.1.2
 jaxlib==0.3.7
+distrax==0.1.2
