@@ -132,5 +132,6 @@ dmypy.json
 example_data.csv
 hmm_AR_k_Tstud.py
 fractal_env.py
+bayesian_lstm.py
 *.ipynb
 transformer_run_loop.py
