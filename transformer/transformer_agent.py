@@ -2,12 +2,13 @@ import collections
 import chex
 import distrax
 import optax
+import functools
 
 #from typing import Optional
 from transformers import *
 
 Params = collections.namedtuple("Params", "pi q1 q2 q1_target q2_target")
-OptStates = collections.namedtuple("OptStates", "p q1 q2")
+OptStates = collections.namedtuple("OptStates", "pi q1 q2")
 Memory = collections.namedtuple("Memory", "pi q1 q2 q1_target q2_target") # initialize Memory(None, None...)
 
 
@@ -47,11 +48,11 @@ class GTrXLActor():
         preds, memory = dict['preds'][:, -1, :], dict['memory']
         categorical_dist = distrax.Categorical(logits=preds)
         actions = jnp.array([0, 1, 2])
-        log_probs = categorical_dist.log_prob(actions) # should .sum(-1)???
+        log_probs = categorical_dist.log_prob(actions) 
         if deterministic:
             pi_action = log_probs.argmax()
         else:
-            pi_action = log_probs.sample()
+            pi_action = categorical_dist.sample(seed=rng)
         log_pi = log_probs[pi_action]
         return pi_action, log_pi, memory
 
@@ -100,8 +101,7 @@ class GTrXLCrtitic():
         inputs = jnp.concatenate([obs, act], axis=-1)
         dict = self.nn.apply.forward(params, rng, inputs, memory)
         q_values, memory = dict['preds'][:, -1, :], dict['memory']
-        return (q_values,#.squeeze()
-                memory)
+        return q_values.squeeze(), memory
 
 
 
@@ -168,10 +168,10 @@ class GTrXLActorCritic():
         deterministic: bool = False,
         memory: Tuple[jnp.ndarray] = None,
     ):
-        action, _, _ = self.pi(rng, obs, params, deterministic, memory)
-        return action
+        action, _, memory = self.pi(rng, obs, params, deterministic, memory)
+        return action, memory
 
-def GTrXLSAC():
+class GTrXLSAC():
     """Soft-Actor-Critic method based on GTrXL networks"""
 
     def __init__(
@@ -222,6 +222,7 @@ def GTrXLSAC():
         q2_opt_state = self.optimizer.init(params.q2)
         return OptStates(pi_opt_state, q1_opt_state, q2_opt_state)
 
+    #@functools.partial(jax.jit, static_argnums=(0,))
     def bellman_backup(
         self,
         rng: chex.PRNGKey,
@@ -234,11 +235,13 @@ def GTrXLSAC():
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         # sample next action
         a_t, logp_a_t, _ = self.ac.pi(rng1, obs_t, params.pi, False, memory.pi)
+
+        a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(1, 1, 1)], axis=1)
+
         # Target Q-values
-        q1_targ = self.ac.q1(rng2, obs_t, a_t, params.q1_target, memory.q1_target)
-        q2_targ = self.ac.q2(rng3, obs_t, a_t, params.q2_target, memory.q2_target)
-        q_targ = jnp.min([q1_targ, q2_targ])
-        assert q_targ == q1_targ or q_targ == q2_targ
+        q1_targ, _ = self.ac.q1(rng2, obs_t, a_t, params.q1_target, memory.q1_target)
+        q2_targ, _ = self.ac.q2(rng3, obs_t, a_t, params.q2_target, memory.q2_target)
+        q_targ = jnp.min(jnp.asarray([q1_targ, q2_targ]))
         backup = r_t + discount_t * (q_targ - alpha * logp_a_t) # for last timestep should be only r_t?
         return jax.lax.stop_gradient(backup)
 
@@ -255,7 +258,7 @@ def GTrXLSAC():
     ):
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         q1, _ = self.ac.q1(rng, obs_tm1, a_tm1, q1_params, memory.q1)
-        backup = bellman_backup(rng, data, params, memory, alpha)
+        backup = self.bellman_backup(rng, data, params, memory, alpha)
         loss = ((q1 - backup)**2).mean()
         return loss
 
@@ -271,7 +274,7 @@ def GTrXLSAC():
     ):
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         q2, _ = self.ac.q2(rng, obs_tm1, a_tm1, q2_params, memory.q2)
-        backup = bellman_backup(rng, data, params, memory, alpha)
+        backup = self.bellman_backup(rng, data, params, memory, alpha)
         loss = ((q2 - backup)**2).mean()
         return loss
     
@@ -286,17 +289,21 @@ def GTrXLSAC():
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
-        obs_tm1, _, _, _, _ = data
+        obs_tm1, a_history, _, _, _ = data
         # sample online a_tm1
         a_tm1, logp_a_tm1, _ = self.ac.pi(rng1, obs_tm1, pi_params, False, memory.pi)
+
+        a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(1, 1, 1)], axis=1)
+
         # Compute Q(o,a)
         q1_pi, _ = self.ac.q1(rng2, obs_tm1, a_tm1, params.q1, memory.q1)
         q2_pi, _ = self.ac.q2(rng3, obs_tm1, a_tm1, params.q2, memory.q2)
-        q_pi = jnp.min([q1_pi, q2_pi])
+        q_pi = jnp.min(jnp.asarray([q1_pi, q2_pi]))
         # Entropy-regularized policy loss
         loss_pi = (alpha * logp_a_tm1 - q_pi).mean()
         return loss_pi
 
+    #@functools.partial(jax.jit, static_argnums=(0,))
     def update(
         self,
         params: Params,
@@ -309,26 +316,27 @@ def GTrXLSAC():
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         # Update q1
-        grads_q1 = jax.grad(loss_q1)(params.q1, params, rng1, data, memory, alpha)
+        grads_q1 = jax.grad(self.loss_q1)(params.q1, params, rng1, data, memory, alpha)
         _, memory_q1 = self.ac.q1(rng1, obs_tm1, a_tm1, params.q1, memory.q1)
         updates_q1, new_opt_state_q1 = self.optimizer.update(grads_q1, opt_states.q1)
         new_params_q1 = optax.apply_updates(params.q1, updates_q1)
         # Update q2
-        grads_q2 = jax.grad(loss_q2)(params.q2, params, rng2, data, memory, alpha)
+        grads_q2 = jax.grad(self.loss_q2)(params.q2, params, rng2, data, memory, alpha)
         _, memory_q2 = self.ac.q2(rng2, obs_tm1, a_tm1, params.q2, memory.q2)
         updates_q2, new_opt_state_q2 = self.optimizer.update(grads_q2, opt_states.q2)
         new_params_q2 = optax.apply_updates(params.q2, updates_q2)
         # Update pi
-        grads_pi = jax.grad(loss_pi)(params.pi, params, rng3, data, memory, alpha)
+        grads_pi = jax.grad(self.loss_pi)(params.pi, params, rng3, data, memory, alpha)
         _, _, memory_pi = self.ac.pi(rng3, obs_tm1, params.pi, False, memory.pi)
         updates_pi, new_opt_state_pi = self.optimizer.update(grads_pi, opt_states.pi)
         new_params_pi = optax.apply_updates(params.pi, updates_pi)
         # Update q1_target
-        new_params_q1_target = params.q1_target*self.polyak
-        new_params_q1_target += (1 - self.polyak)*new_params_q1
+        polyak_average = lambda x, y: x*self.polyak + (1 - self.polyak)*y
+        #new_params_q1_target = params.q1_target*self.polyak + (1 - self.polyak)*new_params_q1
+        new_params_q1_target = jax.tree_map(polyak_average, params.q1_target, new_params_q1)
         # Update q2_target
-        new_params_q2_target = params.q2_target*self.polyak
-        new_params_q2_target += (1 - self.polyak)*new_params_q2
+        #new_params_q2_target = params.q2_target*self.polyak + (1 - self.polyak)*new_params_q2
+        new_params_q2_target = jax.tree_map(polyak_average, params.q2_target, new_params_q2)
         return(
             Params(new_params_pi, new_params_q1, new_params_q2, new_params_q1_target, new_params_q2_target),
             OptStates(new_opt_state_pi, new_opt_state_q1, new_opt_state_q2),
@@ -340,10 +348,10 @@ def GTrXLSAC():
         rng: chex.PRNGKey,
         params: Params,
         obs: jnp.ndarray,
-        memory: Memory,
+        memory_pi_tm1: Tuple[jnp.ndarray] = None,
         deterministic: bool = False,
     ):
-        return self.ac.act(rng, obs, params.pi, deterministic, memory.pi)
+        return self.ac.act(rng, obs, params.pi, deterministic, memory_pi_tm1)
 
     
 

@@ -16,7 +16,7 @@ class Discrete(object):
         assert num_categories >= 0
         self.n = num_categories
         self.shape = ()
-        self.dtype = jnp.int_
+        self.dtype = jnp.int32
 
     def sample(self, rng: chex.PRNGKey) -> chex.Array:
         """Sample random action uniformly from set of categorical choices."""
@@ -24,7 +24,7 @@ class Discrete(object):
             rng, shape=self.shape, minval=0, maxval=self.n
         ).astype(self.dtype)
 
-    def contains(self, x: jnp.int_) -> bool:
+    def contains(self, x: jnp.int32) -> bool:
         """Check whether specific object is within space."""
         range_cond = jnp.logical_and(x >= 0, x < self.n)
         return range_cond
@@ -203,7 +203,7 @@ class FractalEnv(Environment):
 
     def observation_space(self) -> Box:
         """Observation space of the environment."""
-        return Box(jnp.NINF, 0, shape=(1,), dtype=jnp.float32)
+        return Box(-1e3, 0, shape=(1,), dtype=jnp.float32)
 
     def state_space(self) -> Discrete:
         """State space of the environment."""
@@ -226,3 +226,73 @@ def init_process(state, params):
     NegativeStudentT = pm.Bound(pm.StudentT, upper=0.0).dist
     obs = NegativeStudentT(mu=mu_init, sigma=sigma_init, nu=nu_init).random()
     return jnp.asarray(obs)
+
+def sample_params(key, trace): 
+    n_samples = trace['p_transition'].shape[0]
+    index_sample = jax.random.choice(key=key, a=n_samples)
+
+    transition_matrices = trace['p_transition'][index_sample]
+    init_probs = trace['init_probs'][index_sample]
+
+    mu_d = trace['mu_d'][index_sample]
+    sigma_d = trace['sigma_d'][index_sample]
+    nu_d = trace['nu_d'][index_sample]
+
+    mu_r = trace['mu_r'][index_sample]
+    sigma_r = trace['sigma_r'][index_sample]
+    nu_r = trace['nu_r'][index_sample]
+
+    mu_init = trace['mu_init'][index_sample]
+    sigma_init = trace['sigma_init'][index_sample]
+    nu_init = trace['nu_init'][index_sample]
+
+    k = trace['k'][index_sample]
+    params = {
+        'init_probs': init_probs,
+        'p_transition': transition_matrices, 
+        'mu_d': mu_d,
+        'sigma_d': sigma_d, 
+        'nu_d': nu_d,
+        'mu_r': mu_r,
+        'sigma_r': sigma_r,
+        'nu_r': nu_r,
+        'mu_init': mu_init,
+        'sigma_init': sigma_init,
+        'nu_init': nu_init,
+        'k': k
+    }
+    return params
+
+def sample_mean_params(trace): 
+    transition_matrices = trace['p_transition'].mean(0)
+    init_probs = trace['init_probs'].mean(0)
+
+    mu_d = trace['mu_d'].mean(0)
+    sigma_d = trace['sigma_d'].mean(0)
+    nu_d = trace['nu_d'].mean(0)
+
+    mu_r = trace['mu_r'].mean(0)
+    sigma_r = trace['sigma_r'].mean(0)
+    nu_r = trace['nu_r'].mean(0)
+
+    mu_init = trace['mu_init'].mean(0)
+    sigma_init = trace['sigma_init'].mean(0)
+    nu_init = trace['nu_init'].mean(0)
+
+    k = trace['k'].mean(0)
+    params = {
+        'init_probs': init_probs,
+        'p_transition': transition_matrices, 
+        'mu_d': mu_d,
+        'sigma_d': sigma_d, 
+        'nu_d': nu_d,
+        'mu_r': mu_r,
+        'sigma_r': sigma_r,
+        'nu_r': nu_r,
+        'mu_init': mu_init,
+        'sigma_init': sigma_init,
+        'nu_init': nu_init,
+        'k': k
+    }
+    return params
+
