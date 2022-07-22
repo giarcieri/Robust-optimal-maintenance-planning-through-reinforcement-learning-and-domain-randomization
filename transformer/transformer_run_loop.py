@@ -138,6 +138,8 @@ def run_loop(
         else:
             env_params = sample_mean_params(trace)
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
+        # start at hs 0 to initially limit variance
+        hs_tm1 = jnp.array(0)
         if keep_last_window_lenght_obs:
             obs_tm1_history = collections.deque(maxlen=window_length)
         else:
@@ -194,11 +196,18 @@ def run_loop(
         else:
             env_params = sample_mean_params(trace)
         obs, hs = env.reset(next(rng), env_params)
+        # start at hs 0 to initially limit variance
+        hs = jnp.array(0)
+        if keep_last_window_lenght_obs:
+            obs_history = collections.deque(maxlen=window_length)
+        else:
+            obs_history = collections.deque(maxlen=step_per_episode)
         for step in range(step_per_episode):
+            obs_history.append(obs)
             a, memory_tm1 = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
-                obs = obs,
+                obs = jnp.asarray(obs_history).reshape(1, -1, 1),
                 memory_pi_tm1 = memory_tm1,
                 deterministic = True,
             )

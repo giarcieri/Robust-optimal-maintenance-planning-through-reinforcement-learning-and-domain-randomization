@@ -221,7 +221,7 @@ class GTrXLSAC():
         q2_opt_state = self.optimizer.init(params.q2)
         return OptStates(pi_opt_state, q1_opt_state, q2_opt_state)
 
-    #@functools.partial(jax.jit, static_argnums=(0,))
+    @functools.partial(jax.jit, static_argnums=(0,))
     def bellman_backup(
         self,
         rng: chex.PRNGKey,
@@ -245,7 +245,7 @@ class GTrXLSAC():
         return jax.lax.stop_gradient(backup)
 
 
-    #@functools.partial(jax.jit, static_argnums=(0,))
+    @functools.partial(jax.jit, static_argnums=(0,))
     def loss_q1(
         self,
         q1_params: hk.Params,
@@ -261,7 +261,7 @@ class GTrXLSAC():
         loss = ((q1 - backup)**2).mean()
         return loss
 
-    #@functools.partial(jax.jit, static_argnums=(0,))
+    @functools.partial(jax.jit, static_argnums=(0,))
     def loss_q2(
         self,
         q2_params: hk.Params,
@@ -277,7 +277,7 @@ class GTrXLSAC():
         loss = ((q2 - backup)**2).mean()
         return loss
     
-    #@functools.partial(jax.jit, static_argnums=(0,))
+    @functools.partial(jax.jit, static_argnums=(0,))
     def loss_pi(
         self,
         pi_params: hk.Params,
@@ -302,7 +302,7 @@ class GTrXLSAC():
         loss_pi = (alpha * logp_a_tm1 - q_pi).mean()
         return loss_pi
 
-    #@functools.partial(jax.jit, static_argnums=(0,))
+    @functools.partial(jax.jit, static_argnums=(0,))
     def update(
         self,
         params: Params,
@@ -316,17 +316,17 @@ class GTrXLSAC():
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         # Update q1
         grads_q1 = jax.grad(self.loss_q1)(params.q1, params, rng1, data, memory, alpha)
-        _, memory_q1 = self.ac.q1(rng1, obs_tm1, a_tm1, params.q1, memory.q1)
+        #_, memory_q1 = self.ac.q1(rng1, obs_tm1, a_tm1, params.q1, memory.q1)
         updates_q1, new_opt_state_q1 = self.optimizer.update(grads_q1, opt_states.q1)
         new_params_q1 = optax.apply_updates(params.q1, updates_q1)
         # Update q2
         grads_q2 = jax.grad(self.loss_q2)(params.q2, params, rng2, data, memory, alpha)
-        _, memory_q2 = self.ac.q2(rng2, obs_tm1, a_tm1, params.q2, memory.q2)
+        #_, memory_q2 = self.ac.q2(rng2, obs_tm1, a_tm1, params.q2, memory.q2)
         updates_q2, new_opt_state_q2 = self.optimizer.update(grads_q2, opt_states.q2)
         new_params_q2 = optax.apply_updates(params.q2, updates_q2)
         # Update pi
         grads_pi = jax.grad(self.loss_pi)(params.pi, params, rng3, data, memory, alpha)
-        _, _, memory_pi = self.ac.pi(rng3, obs_tm1, params.pi, False, memory.pi)
+        #_, _, memory_pi = self.ac.pi(rng3, obs_tm1, params.pi, False, memory.pi)
         updates_pi, new_opt_state_pi = self.optimizer.update(grads_pi, opt_states.pi)
         new_params_pi = optax.apply_updates(params.pi, updates_pi)
         # Update q1_target
@@ -339,7 +339,8 @@ class GTrXLSAC():
         return(
             Params(new_params_pi, new_params_q1, new_params_q2, new_params_q1_target, new_params_q2_target),
             OptStates(new_opt_state_pi, new_opt_state_q1, new_opt_state_q2),
-            Memory(memory_pi, memory_q1, memory_q2, memory_q1, memory_q2) # for sure this is wrong
+            #Memory(memory_pi, memory_q1, memory_q2, memory_q1, memory_q2) # for sure this is wrong
+            Memory(None, None, None, None, None)
         )
 
     def get_action(
