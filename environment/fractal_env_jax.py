@@ -1,8 +1,8 @@
 import jax
 import chex
-import pymc3 as pm
 from typing import Tuple, Union, Optional, Dict
 from functools import partial
+from numpyro.distributions import StudentT
 
 from jax import numpy as jnp
 
@@ -68,7 +68,7 @@ class Environment(object):
     Taken from gymnax, cannot currently install for dependencies conflicts.
     """
 
-    #@partial(jax.jit, static_argnums=(0,)) 
+    @partial(jax.jit, static_argnums=(0,)) 
     def step(
         self,
         key: chex.PRNGKey,
@@ -90,7 +90,7 @@ class Environment(object):
         obs = jax.lax.select(done, obs_re, obs_st)
         return obs, state, reward, done, info
 
-    #@partial(jax.jit, static_argnums=(0,))
+    @partial(jax.jit, static_argnums=(0,))
     def reset(
         self, key: chex.PRNGKey, params: Dict[str, jnp.ndarray]
     ) -> Tuple[jnp.ndarray, jnp.ndarray]:
@@ -169,11 +169,11 @@ class FractalEnv(Environment):
         transition_matrices = params['p_transition']
         transition_probs = jnp.asarray(transition_matrices[action, state])
         state = jax.random.choice(key=key, a=4, p=transition_probs.squeeze()) 
-        # sample new obs
-        if action == 0:
-            obs = deterioration_process(state, obs, params)
-        else:
-            obs = repair_process(state, obs, action, params)
+        def true_fun(key):
+            return deterioration_process(key, state, obs, params)
+        def false_fun(key):
+            return repair_process(key, state, obs, action, params)
+        obs = jax.lax.cond(action==0, true_fun, false_fun, key)
         return obs, state, reward, False, {}
 
     def reset_env(
@@ -184,7 +184,7 @@ class FractalEnv(Environment):
         init_probs = params['init_probs']
         state = jax.random.choice(key=key, a=4, p=jnp.asarray(init_probs))
         # sample initial obs
-        obs = init_process(state, params)
+        obs = init_process(key, state, params)
         return obs, state
 
     @property
@@ -209,23 +209,49 @@ class FractalEnv(Environment):
         """State space of the environment."""
         return Discrete(4)
 
-def deterioration_process(state, obs, params):
+def _deterioration_process(key, state, obs, params):
     mu_d, sigma_d, nu_d = params['mu_d'][state], params['sigma_d'][state], params['nu_d'][state]
-    DetStudentT = pm.Bound(pm.StudentT, upper=float(-obs)).dist
-    new_obs = DetStudentT(mu=mu_d, sigma=sigma_d, nu=nu_d).random() + obs
-    return jnp.asarray(new_obs)
+    return StudentT(df=nu_d, loc=mu_d, scale=sigma_d).sample(key)
 
-def repair_process(state, obs, action, params): 
+def deterioration_process(key, state, obs, params):
+    sample = _deterioration_process(key, state, obs, params)
+    def true_fun(key):
+        return sample + obs
+    def false_fun(key):
+        key, _ = jax.random.split(key)
+        return _deterioration_process(key, state, obs, params)
+    pred = lambda x: x < -obs
+    return jax.lax.cond(pred(sample), true_fun, false_fun, key)
+
+def _repair_process(key, state, obs, action, params): 
     mu_r, sigma_r, nu_r, k = params['mu_r'][state], params['sigma_r'][state], params['nu_r'][state], params['k'][action-1]
-    NegativeStudentT = pm.Bound(pm.StudentT, upper=0.0).dist
-    new_obs = NegativeStudentT(mu=k*obs + mu_r, sigma=sigma_r, nu=nu_r).random()
-    return jnp.asarray(new_obs)
+    return StudentT(df=nu_r, loc=k*obs + mu_r, scale=sigma_r).sample(key)
 
-def init_process(state, params):
+def repair_process(key, state, obs, action, params): 
+    sample = _repair_process(key, state, obs, action, params)
+    def true_fun(key):
+        return sample
+    def false_fun(key):
+        key, _ = jax.random.split(key)
+        return _repair_process(key, state, obs, action, params)
+    pred = lambda x: x < 0.0
+    return jax.lax.cond(pred(sample), true_fun, false_fun, key)
+    
+
+def _init_process(key, state, params):
     mu_init, sigma_init, nu_init = params['mu_init'][state], params['sigma_init'][state], params['nu_init'][state]
-    NegativeStudentT = pm.Bound(pm.StudentT, upper=0.0).dist
-    obs = NegativeStudentT(mu=mu_init, sigma=sigma_init, nu=nu_init).random()
-    return jnp.asarray(obs)
+    return StudentT(df=nu_init, loc=mu_init, scale=sigma_init).sample(key)
+
+def init_process(key, state, params):
+    sample = _init_process(key, state, params)
+    def true_fun(key):
+        return sample
+    def false_fun(key):
+        key, _ = jax.random.split(key)
+        return _init_process(key, state, params)
+    pred = lambda x: x < 0.0
+    return jax.lax.cond(pred(sample), true_fun, false_fun, key)
+    
 
 def sample_params(key, trace): 
     n_samples = trace['p_transition'].shape[0]
@@ -261,7 +287,7 @@ def sample_params(key, trace):
         'nu_init': nu_init,
         'k': k
     }
-    return params
+    return jax.tree_map(jnp.asarray, params)
 
 def sample_mean_params(trace): 
     transition_matrices = trace['p_transition'].mean(0)
@@ -294,5 +320,5 @@ def sample_mean_params(trace):
         'nu_init': nu_init,
         'k': k
     }
-    return params
+    return jax.tree_map(jnp.asarray, params)
 

@@ -74,10 +74,22 @@ def run_loop(
     keep_last_window_lenght_obs: bool = True,
     gamma: float = 0.99,
     update_every: int = 1,
+    update_iterations: int = 10,
+    gradient_descent_epochs: int = 10,
     update_after: int = 1,
     batch_size: int = 100,
     test_episodes: int = int(1e2),
     domain_randomization_test: bool = True,
+    obs_dim: int = 1,
+    act_dim: int = 3,
+    num_heads: int = 8, 
+    key_size: int = 64, 
+    num_layers: int = 2, 
+    dropout: float = 0.1, 
+    hidden_sizes_mlp: Tuple[int] = [],
+    dropouta: float = 0.0,
+    learning_rate: float = 1e-3,
+    polyak: float = 0.995,
     #agent?
     #env?
     #replay_buffer?
@@ -101,7 +113,7 @@ def run_loop(
 
     # Replay Buffer
     buffer = ReplayBufferPO(
-        capacity=replay_size//window_length, 
+        capacity=replay_size//step_per_episode, 
         episode_horizon=step_per_episode, 
         window_length=window_length, 
         gamma=gamma
@@ -112,16 +124,16 @@ def run_loop(
         rng=next(rng),
         dummy_obs_actor = dummy_obs,
         dummy_obs_critic = dummy_obs_critic,
-        obs_dim = 1,
-        act_dim = 3,
-        num_heads = 8, 
-        key_size = 64, 
-        num_layers = 2, 
-        dropout = 0.1, 
-        hidden_sizes_mlp = [],
-        dropouta = 0.0,
-        learning_rate = 1e-3,
-        polyak = 0.995,
+        obs_dim = obs_dim,
+        act_dim = act_dim,
+        num_heads = num_heads, 
+        key_size = key_size, 
+        num_layers = num_layers, 
+        dropout = dropout, 
+        hidden_sizes_mlp = hidden_sizes_mlp,
+        dropouta = dropouta,
+        learning_rate = learning_rate,
+        polyak = polyak,
     )
     agent_params = agent.init_params()
     opt_states = agent.init_opt_state(agent_params)
@@ -140,20 +152,24 @@ def run_loop(
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
         hs_tm1 = jnp.array(0)
-        if keep_last_window_lenght_obs:
-            obs_tm1_history = collections.deque(maxlen=window_length)
-        else:
-            obs_tm1_history = collections.deque(maxlen=step_per_episode)
+        obs_tm1_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
-            obs_tm1_history.append(obs_tm1)
+            obs_tm1_full_history = obs_tm1_full_history.at[:, step, :].set(obs_tm1)
+            if keep_last_window_lenght_obs:
+                if step < window_length:
+                    obs_tm1_history = obs_tm1_full_history[:, :step+1, :]
+                else:
+                    obs_tm1_history = obs_tm1_full_history[:, step-window_length+1:step+1, :]
+            else:
+                obs_tm1_history = obs_tm1_full_history[:, :step+1, :]
             a_tm1, memory_pi_tm1 = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
-                obs = jnp.asarray(obs_tm1_history).reshape(1, -1, 1),
+                obs = obs_tm1_history,
                 memory_pi_tm1 = memory.pi,
                 deterministic = False,
             )
-            obs_t, hs_t, r_t, _, _ = env.step(next(rng), hs_tm1, obs_tm1, a_tm1, env_params)
+            obs_t, hs_t, r_t, _, _ = env.step(next(rng), hs_tm1, obs_tm1, a_tm1.squeeze(), env_params)
             train_ep_return += r_t
             buffer.push(obs=obs_tm1, action=a_tm1, reward=r_t, episode=train_episode, step=step)
             print(f'Episode {train_episode} Step {step}: o_tm1 {obs_tm1.round(2)}, hs_tm1 {hs_tm1}, a_tm1 {a_tm1}, r_t {r_t}')
@@ -165,19 +181,20 @@ def run_loop(
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
             print('Update')
-            for _ in range(update_every):
+            for _ in range(update_every*update_iterations):
                 idxs = jax.random.randint(next(rng), shape=(batch_size,), minval=0, maxval=buffer.size_buffer)
                 batch = buffer.batch_sample(idxs)
-                agent_params, opt_states, memory = agent.update(
-                    params = agent_params,
-                    rng = next(rng),
-                    data = batch,
-                    memory = memory,
-                    opt_states = opt_states,
-                    alpha = 0.2,
-                )
-                # Let's try without memory
-                memory, memory_tm1 = Memory(None, None, None, None, None), None
+                for _ in range(gradient_descent_epochs):
+                    agent_params, opt_states, memory = agent.update(
+                        params = agent_params,
+                        rng = next(rng),
+                        data = batch,
+                        memory = memory,
+                        opt_states = opt_states,
+                        alpha = 0.2,
+                    )
+                    # Let's try without memory
+                    memory, memory_tm1 = Memory(None, None, None, None, None), None
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
@@ -198,22 +215,26 @@ def run_loop(
         obs, hs = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
         hs = jnp.array(0)
-        if keep_last_window_lenght_obs:
-            obs_history = collections.deque(maxlen=window_length)
-        else:
-            obs_history = collections.deque(maxlen=step_per_episode)
+        obs_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
-            obs_history.append(obs)
+            obs_full_history = obs_full_history.at[:, step, :].set(obs)
+            if keep_last_window_lenght_obs:
+                if step < window_length:
+                    obs_history = obs_full_history[:, :step+1, :]
+                else:
+                    obs_history = obs_full_history[:, step-window_length+1:step+1, :]
+            else:
+                obs_history = obs_full_history[:, :step+1, :]
             a, memory_tm1 = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
-                obs = jnp.asarray(obs_history).reshape(1, -1, 1),
+                obs = obs_history,
                 memory_pi_tm1 = memory_tm1,
                 deterministic = True,
             )
             memory_tm1 = None
             print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
-            obs, hs, r, _, _ = env.step(next(rng), hs, obs, a, env_params)
+            obs, hs, r, _, _ = env.step(next(rng), hs, obs, a.squeeze(), env_params)
             test_ep_return += r
             print(f'Episode {test_episode} Step {step}: r_t {r}')
         print(f'Episode {test_episode} total return {test_ep_return}')
