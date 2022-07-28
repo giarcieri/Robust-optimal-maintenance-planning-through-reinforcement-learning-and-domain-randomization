@@ -90,6 +90,7 @@ def run_loop(
     dropouta: float = 0.0,
     learning_rate: float = 1e-3,
     polyak: float = 0.995,
+    alpha: float = 0.2,
     save_rewards: bool = True,
     save_model: bool = True,
     #agent?
@@ -196,7 +197,7 @@ def run_loop(
                         data = batch,
                         memory = memory,
                         opt_states = opt_states,
-                        alpha = 0.2,
+                        alpha = alpha,
                     )
                     # Let's try without memory
                     #memory = Memory(None, None, None, None, None)

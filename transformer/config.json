@@ -24,6 +24,7 @@
     "dropouta": 0.0,
     "learning_rate": 1e-3,
     "polyak": 0.995,
+    "alpha": 0.2,
     "save_rewards": true,
     "save_model": true
 }

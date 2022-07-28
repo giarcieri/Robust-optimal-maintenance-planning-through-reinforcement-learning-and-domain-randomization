@@ -1,0 +1,8 @@
+#!/bin/bash
+#BSUB -n 1                  
+#BSUB -W 1:00                 
+#BSUB -R "rusage[mem=2048]"    
+#BSUB -J rlfr_main
+#BSUB -o output.txt
+
+python submit_jobs.py --n_seeds 10 --function transformer
