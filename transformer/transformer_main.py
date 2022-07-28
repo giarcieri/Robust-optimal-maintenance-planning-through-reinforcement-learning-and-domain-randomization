@@ -37,7 +37,7 @@ with open("transformer/logs.txt", "a") as f:
 seeds = int(args.n_seeds)
 with open("transformer/logs.txt", "a") as f:
     f.write(f"Running {seeds} parallel seeds\n")
-seeds = jnp.broadcast_to(jnp.arange(seeds), shape=(seeds,2)).astype(jnp.uint32)
+seeds = jnp.repeat(jnp.arange(seeds).reshape(seeds, 1), 2, axis=1).astype(jnp.uint32)
 run_loop_partial = partial(run_loop, trace=trace, reward_matrix=reward_matrix, **config)
 run_loop_pmap = jax.vmap(run_loop_partial, axis_name='i')
 run_loop_pmap(seeds)
