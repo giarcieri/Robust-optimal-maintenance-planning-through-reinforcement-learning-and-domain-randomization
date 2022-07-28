@@ -90,6 +90,8 @@ def run_loop(
     dropouta: float = 0.0,
     learning_rate: float = 1e-3,
     polyak: float = 0.995,
+    save_rewards: bool = True,
+    save_model: bool = True,
     #agent?
     #env?
     #replay_buffer?
@@ -137,13 +139,14 @@ def run_loop(
     )
     agent_params = agent.init_params()
     opt_states = agent.init_opt_state(agent_params)
-    memory, memory_tm1 = Memory(None, None, None, None, None), None
 
     # Train Loop
     start_time = time.time()
     tot_train_ep_returns = []
-    print('Start training loop')
+    with open("logs.txt", "a") as f:
+        f.write(f"Start training loop\n")
     for train_episode in range(train_episodes):
+        memory = Memory(None, None, None, None, None)
         train_ep_return = 0
         if domain_randomization:
             env_params = sample_params(next(rng), trace)
@@ -172,16 +175,18 @@ def run_loop(
             obs_t, hs_t, r_t, _, _ = env.step(next(rng), hs_tm1, obs_tm1, a_tm1.squeeze(), env_params)
             train_ep_return += r_t
             buffer.push(obs=obs_tm1, action=a_tm1, reward=r_t, episode=train_episode, step=step)
-            print(f'Episode {train_episode} Step {step}: o_tm1 {obs_tm1.round(2)}, hs_tm1 {hs_tm1}, a_tm1 {a_tm1}, r_t {r_t}')
+            #print(f'Episode {train_episode} Step {step}: o_tm1 {obs_tm1.round(2)}, hs_tm1 {hs_tm1}, a_tm1 {a_tm1}, r_t {r_t}')
             obs_tm1, hs_tm1 = obs_t, hs_t
             memory = Memory(memory_pi_tm1, None, None, None, None)
             # Let's try without memory
-            memory, memory_tm1 = Memory(None, None, None, None, None), None
-        print(f'Episode {train_episode} total return {train_ep_return}')
+            #memory = Memory(None, None, None, None, None)
+        #print(f'Episode {train_episode} total return {train_ep_return}')
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
-            print('Update')
+            with open("logs.txt", "a") as f:
+                f.write(f"Update\n")
             for _ in range(update_every*update_iterations):
+                memory = Memory(None, None, None, None, None)
                 idxs = jax.random.randint(next(rng), shape=(batch_size,), minval=0, maxval=buffer.size_buffer)
                 batch = buffer.batch_sample(idxs)
                 for _ in range(gradient_descent_epochs):
@@ -194,19 +199,22 @@ def run_loop(
                         alpha = 0.2,
                     )
                     # Let's try without memory
-                    memory, memory_tm1 = Memory(None, None, None, None, None), None
+                    #memory = Memory(None, None, None, None, None)
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
     # Save train episode returns 
-    file = 'train_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
-    with open(file, "wb") as fp:
-        pickle.dump(tot_train_ep_returns, fp)
+    if save_rewards:
+        file = './rewards/train_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        with open(file, "wb") as fp:
+            pickle.dump(tot_train_ep_returns, fp)
     # Test
     start_time = time.time() 
     tot_test_ep_returns = []
-    print('Starting test')
+    with open("logs.txt", "a") as f:
+        f.write(f"Starting test\n")
     for test_episode in range(test_episodes):
+        memory_tm1 = None
         test_ep_return = 0
         if domain_randomization_test:
             env_params = sample_params(next(rng), trace)
@@ -232,23 +240,25 @@ def run_loop(
                 memory_pi_tm1 = memory_tm1,
                 deterministic = True,
             )
-            memory_tm1 = None
-            print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
+            #memory_tm1 = None
+            #print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
             obs, hs, r, _, _ = env.step(next(rng), hs, obs, a.squeeze(), env_params)
             test_ep_return += r
-            print(f'Episode {test_episode} Step {step}: r_t {r}')
-        print(f'Episode {test_episode} total return {test_ep_return}')
+            #print(f'Episode {test_episode} Step {step}: r_t {r}')
+        #print(f'Episode {test_episode} total return {test_ep_return}')
         # Collect test episode return
         tot_test_ep_returns.append(test_ep_return)
     test_time = time.time()-start_time
     # Save train episode returns 
-    file = 'test_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
-    with open(file, "wb") as fp:
-        pickle.dump(tot_test_ep_returns, fp)
+    if save_rewards:
+        file = './rewards/test_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        with open(file, "wb") as fp:
+            pickle.dump(tot_test_ep_returns, fp)
     # Save model
-    params_memory = {'params': agent_params, 'memory': memory}
-    file = 'model_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
-    with open(file, "wb") as fp:
-        pickle.dump(params_memory, fp)
+    if save_model:
+        params_memory = {'params': agent_params, 'memory': memory}
+        file = './saved_models/model_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        with open(file, "wb") as fp:
+            pickle.dump(params_memory, fp)
 
         
