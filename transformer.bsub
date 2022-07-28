@@ -5,4 +5,4 @@
 #BSUB -J tranformer_main
 #BSUB -o output.txt
 
-python -m transformer.transformer_main
+python -m transformer.transformer_main --n_seeds 10
