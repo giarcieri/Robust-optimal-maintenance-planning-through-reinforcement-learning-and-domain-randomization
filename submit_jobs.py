@@ -13,6 +13,6 @@ devices = jax.local_device_count()
 seeds = int(args.n_seeds)
 
 for i in range(seeds):
-    command = ['bsub'] + ['-o'] + ['output.txt'] + ['-n'] + ['1'] + ['-W'] + ['200:00'] \
+    command = ['bsub'] + ['-o'] + ['output.txt'] + ['-n'] + ['1'] + ['-W'] + ['200:00'] + \
         ['-R'] + ['rusage[mem=2048]'] + ['python'] + ['main.py'] +  ['--seed'] + [f'{i}'] + ['--function'] + [f'{args.function}']
     out = subprocess.run(command)
