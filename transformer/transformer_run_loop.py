@@ -3,11 +3,11 @@ import time
 import pickle
 import os, sys
 
-from transformer_agent import *
-dir2 = os.path.abspath('')
-dir1 = os.path.dirname(dir2)
-if not dir1 in sys.path: sys.path.append(dir1)
-from environment.fractal_env_jax import *
+from .transformer_agent import *
+#dir2 = os.path.abspath('')
+#dir1 = os.path.dirname(dir2)
+#if not dir1 in sys.path: sys.path.append(dir1)
+from ..environment.fractal_env_jax import *
 
 class ReplayBufferPO(object):
     """A replay buffer for POMDPs that stores time-series of observations"""

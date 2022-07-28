@@ -1,4 +1,4 @@
-from transformer_run_loop import *
+from .transformer_run_loop import *
 import json
 from functools import partial
 

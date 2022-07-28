@@ -4,8 +4,7 @@ import distrax
 import optax
 import functools
 
-#from typing import Optional
-from transformers import *
+from .transformers import *
 
 Params = collections.namedtuple("Params", "pi q1 q2 q1_target q2_target")
 OptStates = collections.namedtuple("OptStates", "pi q1 q2")
