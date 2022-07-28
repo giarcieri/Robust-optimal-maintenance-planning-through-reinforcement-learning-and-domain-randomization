@@ -1,6 +1,7 @@
 import json
 import argparse
 from functools import partial
+import pickle
 import jax
 
 parser = argparse.ArgumentParser(description='rlfr')
@@ -14,7 +15,7 @@ devices = jax.local_device_count()
 seed = int(args.seed)
 
 if args.function == 'transformer':
-    from .transformer.transformer_run_loop import *
+    from transformer.transformer_run_loop import *
     with open('transformer/config.json') as config_file:
         config = json.load(config_file)
     with open("transformer/logs.txt", "a") as f:
