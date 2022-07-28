@@ -1,6 +1,7 @@
 import json
 import argparse
 from functools import partial
+import jax
 
 parser = argparse.ArgumentParser(description='rlfr')
 parser.add_argument('-i', '--seed', type=int, metavar='',
