@@ -5,4 +5,4 @@
 #BSUB -J tranformer_main
 #BSUB -o output.txt
 
-python transformer.transformer_main.py
+python transformer/transformer_main.py
