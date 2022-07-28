@@ -2,10 +2,6 @@ from transformer_run_loop import *
 import json
 from functools import partial
 
-dir2 = os.path.abspath('')
-dir1 = os.path.dirname(dir2)
-if not dir1 in sys.path: sys.path.append(dir1)
-from environment.hmm_AR_k_Tstud import HMMStates, TruncatedNormalEmissionsAR_k
 file = '../trace.pickle'
 with open(file, "rb") as fp:
     trace = pickle.load(fp)
