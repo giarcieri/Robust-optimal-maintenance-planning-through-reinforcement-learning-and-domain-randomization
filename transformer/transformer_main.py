@@ -2,7 +2,7 @@ from .transformer_run_loop import *
 import json
 from functools import partial
 
-file = '../trace.pickle'
+file = 'trace.pickle'
 with open(file, "rb") as fp:
     trace = pickle.load(fp)
     
@@ -22,11 +22,11 @@ reward_matrix = jnp.asarray([
     [1*reward_a_A1 + reward_a_R2 + reward_s_0, 1.33*reward_a_A1 + reward_a_R2 + reward_s_1, 1.66*reward_a_A1 + reward_a_R2 + reward_s_2, 2*reward_a_A1 + reward_a_R2 + reward_s_3]
 ])
 
-with open('config.json') as config_file:
+with open('transformer/config.json') as config_file:
     config = json.load(config_file)
 
 devices = jax.local_device_count()
-with open("logs.txt", "a") as f:
+with open("transformer/logs.txt", "a") as f:
     f.write(f"Running {devices} parallel seeds\n")
 seeds = jnp.broadcast_to(jnp.arange(devices), shape=(devices,2)).astype(jnp.uint32)
 run_loop_partial = partial(run_loop, trace=trace, reward_matrix=reward_matrix, **config)

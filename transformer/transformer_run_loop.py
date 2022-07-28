@@ -4,10 +4,10 @@ import pickle
 import os, sys
 
 from .transformer_agent import *
-#dir2 = os.path.abspath('')
-#dir1 = os.path.dirname(dir2)
-#if not dir1 in sys.path: sys.path.append(dir1)
-from ..environment.fractal_env_jax import *
+dir2 = os.path.abspath('')
+dir1 = os.path.dirname(dir2)
+if not dir1 in sys.path: sys.path.append(dir1)
+from environment.fractal_env_jax import *
 
 class ReplayBufferPO(object):
     """A replay buffer for POMDPs that stores time-series of observations"""
@@ -143,7 +143,7 @@ def run_loop(
     # Train Loop
     start_time = time.time()
     tot_train_ep_returns = []
-    with open("logs.txt", "a") as f:
+    with open("transformer/logs.txt", "a") as f:
         f.write(f"Start training loop\n")
     for train_episode in range(train_episodes):
         memory = Memory(None, None, None, None, None)
@@ -183,7 +183,7 @@ def run_loop(
         #print(f'Episode {train_episode} total return {train_ep_return}')
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
-            with open("logs.txt", "a") as f:
+            with open("transformer/logs.txt", "a") as f:
                 f.write(f"Update\n")
             for _ in range(update_every*update_iterations):
                 memory = Memory(None, None, None, None, None)
@@ -205,13 +205,13 @@ def run_loop(
     train_time = time.time()-start_time
     # Save train episode returns 
     if save_rewards:
-        file = './rewards/train_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        file = 'transformer/rewards/train_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
         with open(file, "wb") as fp:
             pickle.dump(tot_train_ep_returns, fp)
     # Test
     start_time = time.time() 
     tot_test_ep_returns = []
-    with open("logs.txt", "a") as f:
+    with open("transformer/logs.txt", "a") as f:
         f.write(f"Starting test\n")
     for test_episode in range(test_episodes):
         memory_tm1 = None
@@ -251,13 +251,13 @@ def run_loop(
     test_time = time.time()-start_time
     # Save train episode returns 
     if save_rewards:
-        file = './rewards/test_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        file = 'transformer/rewards/test_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
         with open(file, "wb") as fp:
             pickle.dump(tot_test_ep_returns, fp)
     # Save model
     if save_model:
         params_memory = {'params': agent_params, 'memory': memory}
-        file = './saved_models/model_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        file = 'transformer/saved_models/model_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
         with open(file, "wb") as fp:
             pickle.dump(params_memory, fp)
 
