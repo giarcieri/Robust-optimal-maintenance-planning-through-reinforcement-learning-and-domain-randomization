@@ -3,7 +3,7 @@
     "window_length": 5,
     "use_action_history": false,
     "replay_size": 1000000, 
-    "train_episodes": 100000,
+    "train_episodes": 10000,
     "step_per_episode": 50,
     "keep_last_window_lenght_obs": true,
     "gamma": 0.99,
@@ -26,5 +26,6 @@
     "polyak": 0.995,
     "alpha": 0.2,
     "save_rewards": true,
-    "save_model": true
+    "save_model": true,
+    "gridsearch": false
 }
