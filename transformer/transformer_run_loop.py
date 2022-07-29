@@ -266,6 +266,6 @@ def run_loop(
         with open("transformer/gridsearch_results/gridsearch_results.txt", "a") as f:
             f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} num_heads {num_heads} \
                 num_layers {num_layers} hidden_sizes_mlp {hidden_sizes_mlp} learning_rate {learning_rate} alpha {alpha}: \
-                    mean {float(jnp.asarray(tot_test_ep_returns).mean())} std {float(jnp.asarray(tot_test_ep_returns).std())}")
+                    mean {float(jnp.asarray(tot_test_ep_returns).mean())} std {float(jnp.asarray(tot_test_ep_returns).std())}\n")
 
         

@@ -9,8 +9,6 @@ parser.add_argument('-tr', '--train_episodes', type=int, metavar='',
                     required=True)
 parser.add_argument('-te', '--test_episodes', type=int, metavar='',
                     required=True)
-parser.add_argument('-sr', '--save_rewards', type=bool, metavar='',
-                    required=True)
 parser.add_argument('-ui', '--update_iterations', type=int, metavar='',
                     required=True)
 parser.add_argument('-gd', '--gradient_descent_epochs', type=int, metavar='',
@@ -23,9 +21,11 @@ parser.add_argument('-hs', '--hidden_sizes_mlp', type=int, metavar='',
                     required=True)
 parser.add_argument('-lr', '--learning_rate', type=float, metavar='',
                     required=True)
-parser.add_argument('-sm', '--save_model', type=bool, metavar='',
-                    required=True)
 parser.add_argument('-a', '--alpha', type=float, metavar='',
+                    required=True)
+parser.add_argument('-sr', '--save_rewards', type=bool, metavar='',
+                    required=True)
+parser.add_argument('-sm', '--save_model', type=bool, metavar='',
                     required=True)
 parser.add_argument('-gr', '--gridsearch', type=bool, metavar='',
                     required=True)
