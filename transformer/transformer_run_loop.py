@@ -77,7 +77,7 @@ def run_loop(
     update_iterations: int = 10,
     gradient_descent_epochs: int = 10,
     update_after: int = 1,
-    batch_size: int = 100,
+    batch_size: int = 2,
     test_episodes: int = int(1e2),
     domain_randomization_test: bool = True,
     obs_dim: int = 1,
@@ -264,8 +264,6 @@ def run_loop(
             pickle.dump(params_memory, fp)
     if gridsearch:
         with open("transformer/gridsearch_results/gridsearch_results.txt", "a") as f:
-            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} num_heads {num_heads} \
-                num_layers {num_layers} hidden_sizes_mlp {hidden_sizes_mlp} learning_rate {learning_rate} alpha {alpha}: \
-                    mean {float(jnp.asarray(tot_test_ep_returns).mean())} std {float(jnp.asarray(tot_test_ep_returns).std())}\n")
+            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} num_heads {num_heads} num_layers {num_layers} hidden_sizes_mlp {hidden_sizes_mlp} learning_rate {learning_rate} alpha {alpha}: mean {float(jnp.asarray(tot_test_ep_returns).mean())} std {float(jnp.asarray(tot_test_ep_returns).std())}\n")
 
         

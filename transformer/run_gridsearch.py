@@ -1,6 +1,7 @@
 import argparse
 import pickle
-from transformer.transformer_run_loop import *
+import ast
+from .transformer_run_loop import *
 
 parser = argparse.ArgumentParser(description='rlfr')
 parser.add_argument('-i', '--seed', type=int, metavar='',
@@ -17,7 +18,7 @@ parser.add_argument('-nh', '--num_heads', type=int, metavar='',
                     required=True)
 parser.add_argument('-nl', '--num_layers', type=int, metavar='',
                     required=True)
-parser.add_argument('-hs', '--hidden_sizes_mlp', type=int, metavar='',
+parser.add_argument('-hs', '--hidden_sizes_mlp', type=str, metavar='',
                     required=True)
 parser.add_argument('-lr', '--learning_rate', type=float, metavar='',
                     required=True)
@@ -31,6 +32,8 @@ parser.add_argument('-gr', '--gridsearch', type=bool, metavar='',
                     required=True)
 args = parser.parse_args()
 
+
+args.hidden_sizes_mlp = ast.literal_eval(args.hidden_sizes_mlp)
 # convert to dictionary
 config = vars(args)
 
@@ -54,4 +57,5 @@ reward_matrix = jnp.asarray([
     [1*reward_a_A1 + reward_a_R2 + reward_s_0, 1.33*reward_a_A1 + reward_a_R2 + reward_s_1, 1.66*reward_a_A1 + reward_a_R2 + reward_s_2, 2*reward_a_A1 + reward_a_R2 + reward_s_3]
 ])
 
-run_loop(trace=trace, reward_matrix=reward_matrix, **config)
+run_loop(trace=trace, reward_matrix=reward_matrix, domain_randomization=False, window_length=5, 
+        domain_randomization_test=False, **config)
