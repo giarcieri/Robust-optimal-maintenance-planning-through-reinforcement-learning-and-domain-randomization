@@ -156,7 +156,7 @@ def run_loop(
             env_params = sample_mean_params(trace)
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
-        hs_tm1 = jnp.array(0)
+        #hs_tm1 = jnp.array(0)
         obs_tm1_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_tm1_full_history = obs_tm1_full_history.at[:, step, :].set(obs_tm1)
@@ -224,7 +224,7 @@ def run_loop(
             env_params = sample_mean_params(trace)
         obs, hs = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
-        hs = jnp.array(0)
+        #hs = jnp.array(0)
         obs_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_full_history = obs_full_history.at[:, step, :].set(obs)
@@ -264,6 +264,6 @@ def run_loop(
             pickle.dump(params_memory, fp)
     if gridsearch:
         with open("transformer/gridsearch_results/gridsearch_results.txt", "a") as f:
-            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} num_heads {num_heads} num_layers {num_layers} hidden_sizes_mlp {hidden_sizes_mlp} learning_rate {learning_rate} alpha {alpha}: mean {float(jnp.asarray(tot_test_ep_returns).mean())} std {float(jnp.asarray(tot_test_ep_returns).std())}\n")
+            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} num_heads {num_heads} num_layers {num_layers} hidden_sizes_mlp {hidden_sizes_mlp} learning_rate {learning_rate} alpha {alpha} polyak {polyak} keep_last_window_lenght_obs {keep_last_window_lenght_obs}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
 
         

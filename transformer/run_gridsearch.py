@@ -30,6 +30,10 @@ parser.add_argument('-sm', '--save_model', type=bool, metavar='',
                     required=True)
 parser.add_argument('-gr', '--gridsearch', type=bool, metavar='',
                     required=True)
+parser.add_argument('-wind', '--keep_last_window_lenght_obs', type=bool, metavar='',
+                    required=True)
+parser.add_argument('-pk', '--polyak', type=float, metavar='',
+                    required=True)
 args = parser.parse_args()
 
 
