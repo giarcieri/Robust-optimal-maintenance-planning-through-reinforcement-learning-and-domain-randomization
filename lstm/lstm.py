@@ -19,7 +19,7 @@ class DeepLSTM():
     self.output_units = output_units
 
   def network(self):
-      layers = [lambda x : x.reshape(-1, 1)]
+      layers = []
       for idx, num_units in enumerate(self.hidden_units):
         layers.append(hk.LSTM(num_units, name=f"lstm_layer_{idx}"))
         if idx != len(self.hidden_units)-1: 
@@ -28,10 +28,6 @@ class DeepLSTM():
       #layers.append(hk.nets.MLP([self.output_units])),
       model = hk.DeepRNN(layers)
       return model
-
-  def _print(self, x):
-      print(x.shape)
-      return x
 
   def dynamic_unroll(self, obs:jnp.ndarray):
       net = self.network()

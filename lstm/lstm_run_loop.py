@@ -1,9 +1,8 @@
-import random
 import time
 import pickle
 import os, sys
 
-from .transformer_agent import *
+from .lstm_agent import *
 dir2 = os.path.abspath('')
 dir1 = os.path.dirname(dir2)
 if not dir1 in sys.path: sys.path.append(dir1)
@@ -71,7 +70,6 @@ def run_loop(
     replay_size: int = int(1e6),
     train_episodes: int = int(1e2),
     step_per_episode: int = 50,
-    keep_last_window_lenght_obs: bool = True,
     gamma: float = 0.99,
     update_every: int = 1,
     update_iterations: int = 10,
@@ -82,12 +80,7 @@ def run_loop(
     domain_randomization_test: bool = True,
     obs_dim: int = 1,
     act_dim: int = 3,
-    num_heads: int = 8, 
-    key_size: int = 64, 
-    num_layers: int = 2, 
-    dropout: float = 0.1, 
-    hidden_sizes_mlp: Tuple[int] = [],
-    dropouta: float = 0.0,
+    hidden_sizes: Iterable[int] = [100, 100],
     learning_rate: float = 1e-3,
     polyak: float = 0.995,
     alpha: float = 0.2,
@@ -124,18 +117,13 @@ def run_loop(
     )
 
     # Agent
-    agent = GTrXLSAC(
+    agent = LSTMSAC(
         rng=next(rng),
         dummy_obs_actor = dummy_obs,
         dummy_obs_critic = dummy_obs_critic,
         obs_dim = obs_dim,
         act_dim = act_dim,
-        num_heads = num_heads, 
-        key_size = key_size, 
-        num_layers = num_layers, 
-        dropout = dropout, 
-        hidden_sizes_mlp = hidden_sizes_mlp,
-        dropouta = dropouta,
+        hidden_sizes = hidden_sizes,
         learning_rate = learning_rate,
         polyak = polyak,
     )
@@ -145,10 +133,9 @@ def run_loop(
     # Train Loop
     start_time = time.time()
     tot_train_ep_returns = []
-    with open("transformer/logs.txt", "a") as f:
+    with open("lstm/logs.txt", "a") as f:
         f.write(f"Start training loop\n")
     for train_episode in range(train_episodes):
-        memory = Memory(None, None, None, None, None)
         train_ep_return = 0
         if domain_randomization:
             env_params = sample_params(next(rng), trace)
@@ -156,22 +143,19 @@ def run_loop(
             env_params = sample_mean_params(trace)
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
-        #hs_tm1 = jnp.array(0)
+        hs_tm1 = jnp.array(0)
         obs_tm1_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_tm1_full_history = obs_tm1_full_history.at[:, step, :].set(obs_tm1)
-            if keep_last_window_lenght_obs:
-                if step < window_length:
-                    obs_tm1_history = obs_tm1_full_history[:, :step+1, :]
-                else:
-                    obs_tm1_history = obs_tm1_full_history[:, step-window_length+1:step+1, :]
-            else:
+            if step < window_length:
                 obs_tm1_history = obs_tm1_full_history[:, :step+1, :]
-            a_tm1, memory_pi_tm1 = agent.get_action(
+                obs_tm1_history = jnp.concatenate([jnp.zeros((1, window_length-(step+1), 1)), obs_tm1_history], axis=1)
+            else:
+                obs_tm1_history = obs_tm1_full_history[:, step-window_length+1:step+1, :]
+            a_tm1 = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
                 obs = obs_tm1_history,
-                memory_pi_tm1 = memory.pi,
                 deterministic = False,
             )
             obs_t, hs_t, r_t, _, _ = env.step(next(rng), hs_tm1, obs_tm1, a_tm1.squeeze(), env_params)
@@ -179,44 +163,36 @@ def run_loop(
             buffer.push(obs=obs_tm1, action=a_tm1, reward=r_t, episode=train_episode, step=step)
             #print(f'Episode {train_episode} Step {step}: o_tm1 {obs_tm1.round(2)}, hs_tm1 {hs_tm1}, a_tm1 {a_tm1}, r_t {r_t}')
             obs_tm1, hs_tm1 = obs_t, hs_t
-            memory = Memory(memory_pi_tm1, None, None, None, None)
-            # Let's try without memory
-            #memory = Memory(None, None, None, None, None)
         #print(f'Episode {train_episode} total return {train_ep_return}')
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
-            with open("transformer/logs.txt", "a") as f:
+            with open("lstm/logs.txt", "a") as f:
                 f.write(f"Update\n")
             for _ in range(update_every*update_iterations):
-                memory = Memory(None, None, None, None, None)
                 idxs = jax.random.randint(next(rng), shape=(batch_size,), minval=0, maxval=buffer.size_buffer)
                 batch = buffer.batch_sample(idxs)
                 for _ in range(gradient_descent_epochs):
-                    agent_params, opt_states, memory = agent.update(
+                    agent_params, opt_states = agent.update(
                         params = agent_params,
                         rng = next(rng),
                         data = batch,
-                        memory = memory,
                         opt_states = opt_states,
                         alpha = alpha,
                     )
-                    # Let's try without memory
-                    #memory = Memory(None, None, None, None, None)
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
     # Save train episode returns 
     if save_rewards:
-        file = 'transformer/rewards/train_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        file = 'lstm/rewards/train_rewards_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
         with open(file, "wb") as fp:
             pickle.dump(tot_train_ep_returns, fp)
     # Test
     start_time = time.time() 
     tot_test_ep_returns = []
-    with open("transformer/logs.txt", "a") as f:
+    with open("lstm/logs.txt", "a") as f:
         f.write(f"Starting test\n")
     for test_episode in range(test_episodes):
-        memory_tm1 = None
         test_ep_return = 0
         if domain_randomization_test:
             env_params = sample_params(next(rng), trace)
@@ -224,25 +200,21 @@ def run_loop(
             env_params = sample_mean_params(trace)
         obs, hs = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
-        #hs = jnp.array(0)
+        hs = jnp.array(0)
         obs_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_full_history = obs_full_history.at[:, step, :].set(obs)
-            if keep_last_window_lenght_obs:
-                if step < window_length:
-                    obs_history = obs_full_history[:, :step+1, :]
-                else:
-                    obs_history = obs_full_history[:, step-window_length+1:step+1, :]
-            else:
+            if step < window_length:
                 obs_history = obs_full_history[:, :step+1, :]
-            a, memory_tm1 = agent.get_action(
+                obs_history = jnp.concatenate([jnp.zeros((1, window_length-(step+1), 1)), obs_history], axis=1)
+            else:
+                obs_history = obs_full_history[:, step-window_length+1:step+1, :]
+            a = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
                 obs = obs_history,
-                memory_pi_tm1 = memory_tm1,
                 deterministic = True,
             )
-            #memory_tm1 = None
             #print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
             obs, hs, r, _, _ = env.step(next(rng), hs, obs, a.squeeze(), env_params)
             test_ep_return += r
@@ -253,17 +225,17 @@ def run_loop(
     test_time = time.time()-start_time
     # Save train episode returns 
     if save_rewards:
-        file = 'transformer/rewards/test_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        file = 'lstm/rewards/test_rewards_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
         with open(file, "wb") as fp:
             pickle.dump(tot_test_ep_returns, fp)
     # Save model
     if save_model:
         params_memory = {'params': agent_params}
-        file = 'transformer/saved_models/model_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
+        file = 'lstm/saved_models/model_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
         with open(file, "wb") as fp:
             pickle.dump(params_memory, fp)
     if gridsearch:
-        with open("transformer/gridsearch_results/gridsearch_results.txt", "a") as f:
-            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} num_heads {num_heads} num_layers {num_layers} hidden_sizes_mlp {hidden_sizes_mlp} learning_rate {learning_rate} alpha {alpha} polyak {polyak} keep_last_window_lenght_obs {keep_last_window_lenght_obs}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
+        with open("lstm/gridsearch_results/gridsearch_results.txt", "a") as f:
+            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} hidden_sizes {hidden_sizes} learning_rate {learning_rate} alpha {alpha} polyak {polyak}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
 
         

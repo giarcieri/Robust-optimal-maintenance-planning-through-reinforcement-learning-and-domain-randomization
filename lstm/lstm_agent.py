@@ -4,33 +4,25 @@ import distrax
 import optax
 import functools
 
-from .transformers import *
+from .lstm import *
 
 Params = collections.namedtuple("Params", "pi q1 q2 q1_target q2_target")
 OptStates = collections.namedtuple("OptStates", "pi q1 q2")
-Memory = collections.namedtuple("Memory", "pi q1 q2 q1_target q2_target") # initialize Memory(None, None...)
 
 
-class GTrXLActor():
-    """GTrXL Policy Network"""
+class LSTMActor():
+    """LSTM Policy Network"""
 
     def __init__(
         self, 
         rng: chex.PRNGKey,
         dummy_obs: jnp.ndarray,
         act_dim: int = 3, 
-        num_heads: int = 8, 
-        key_size: int = 64, 
-        num_layers: int = 2, 
-        dropout: float = 0.1, 
-        hidden_sizes_mlp: Iterable[int] = [],
-        dropouta: float = 0.0,
-        #name: Optional[str] = None
+        hidden_sizes: Iterable[int] = [100, 100],
     ):
-        #super().__init__(name)
 
         def nn_func():
-            return apply_GTrXL(dummy_obs.shape[-1], num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, act_dim)
+            return apply_DeepLSTM(hidden_units=hidden_sizes, output_units=act_dim)
         
         self.nn = hk.multi_transform(nn_func)
         self._init_params = self.nn.init(rng, dummy_obs)
@@ -41,10 +33,8 @@ class GTrXLActor():
         obs: jnp.ndarray,
         params: hk.Params,
         deterministic: bool = False,
-        memory: Tuple[jnp.ndarray] = None,
     ):
-        dict = self.nn.apply.forward(params, rng, obs, memory)
-        preds, memory = dict['preds'][:, -1, :], dict['memory']
+        preds = self.nn.apply.forward(params, rng, obs) #.squeeze()?
         categorical_dist = distrax.Categorical(logits=preds)
         log_probs = jnp.log(categorical_dist.probs)
         if deterministic:
@@ -52,7 +42,7 @@ class GTrXLActor():
             log_pi = log_probs.max(-1)
         else:
             pi_action, log_pi = categorical_dist.sample_and_log_prob(seed=rng)
-        return pi_action, log_pi, memory
+        return pi_action, log_pi
 
     @property
     def init_params(
@@ -62,22 +52,17 @@ class GTrXLActor():
 
     
 
-class GTrXLCritic():
-    """GTrXL Critic Network that computes q-values"""
+class LSTMCritic():
+    """LSTM Critic Network that computes q-values"""
 
     def __init__(
         self,
         rng: chex.PRNGKey,
         dummy_obs: jnp.ndarray,
-        num_heads: int = 8, 
-        key_size: int = 64, 
-        num_layers: int = 2, 
-        dropout: float = 0.1, 
-        hidden_sizes_mlp: Iterable[int] = [],
-        dropouta: float = 0.0,
+        hidden_sizes: Iterable[int] = [100, 100],
     ):
         def nn_func():
-            return apply_GTrXL(dummy_obs.shape[-1], num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, 1)
+            return apply_DeepLSTM(hidden_units=hidden_sizes, output_units=1)
 
         self.nn = hk.multi_transform(nn_func)
         self._init_params = self.nn.init(rng, dummy_obs)
@@ -94,17 +79,15 @@ class GTrXLCritic():
         obs: jnp.ndarray,
         act: jnp.ndarray,
         params: hk.Params,
-        memory: Tuple[jnp.ndarray] = None,
     ):
         inputs = jnp.concatenate([obs, act], axis=-1)
-        dict = self.nn.apply.forward(params, rng, inputs, memory)
-        q_values, memory = dict['preds'][:, -1, :], dict['memory']
-        return q_values.squeeze(), memory
+        q_values = self.nn.apply.forward(params, rng, inputs)
+        return q_values.squeeze()
 
 
 
-class GTrXLActorCritic():
-    """Class to combine actor and critc networks based on GTrXL"""
+class LSTMActorCritic():
+    """Class to combine actor and critc networks based on LSTM"""
 
     def __init__(
         self,
@@ -113,44 +96,24 @@ class GTrXLActorCritic():
         dummy_obs_critic: jnp.ndarray,
         obs_dim: int = 1,
         act_dim: int = 3,
-        num_heads: int = 8, 
-        key_size: int = 64, 
-        num_layers: int = 2, 
-        dropout: float = 0.1, 
-        hidden_sizes_mlp: Iterable[int] = [],
-        dropouta: float = 0.0,
+        hidden_sizes: Iterable[int] = [100, 100],
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
-        self.pi = GTrXLActor(
+        self.pi = LSTMActor(
             rng = rng1,
             dummy_obs = dummy_obs_actor,
             act_dim = act_dim, 
-            num_heads = num_heads, 
-            key_size = key_size, 
-            num_layers = num_layers, 
-            dropout = dropout, 
-            hidden_sizes_mlp = hidden_sizes_mlp,
-            dropouta = dropout,
+            hidden_sizes = hidden_sizes,
         )
-        self.q1 = GTrXLCritic(
+        self.q1 = LSTMCritic(
             rng = rng2,
             dummy_obs = dummy_obs_critic,
-            num_heads = num_heads, 
-            key_size = key_size, 
-            num_layers = num_layers, 
-            dropout = dropout, 
-            hidden_sizes_mlp = hidden_sizes_mlp,
-            dropouta = dropout,
+            hidden_sizes = hidden_sizes,
         )
-        self.q2 = GTrXLCritic(
+        self.q2 = LSTMCritic(
             rng = rng3,
             dummy_obs = dummy_obs_critic,
-            num_heads = num_heads, 
-            key_size = key_size, 
-            num_layers = num_layers, 
-            dropout = dropout, 
-            hidden_sizes_mlp = hidden_sizes_mlp,
-            dropouta = dropout,
+            hidden_sizes = hidden_sizes
         )
 
     def init_params(
@@ -164,13 +127,12 @@ class GTrXLActorCritic():
         obs: jnp.ndarray,
         params: hk.Params,
         deterministic: bool = False,
-        memory: Tuple[jnp.ndarray] = None,
     ):
-        action, _, memory = self.pi(rng, obs, params, deterministic, memory)
-        return action, memory
+        action, _ = self.pi(rng, obs, params, deterministic)
+        return action
 
-class GTrXLSAC():
-    """Soft-Actor-Critic method based on GTrXL networks"""
+class LSTMSAC():
+    """Soft-Actor-Critic method based on LSTM networks"""
 
     def __init__(
         self,
@@ -179,28 +141,18 @@ class GTrXLSAC():
         dummy_obs_critic: jnp.ndarray,
         obs_dim: int = 1,
         act_dim: int = 3,
-        num_heads: int = 8, 
-        key_size: int = 64, 
-        num_layers: int = 2, 
-        dropout: float = 0.1, 
-        hidden_sizes_mlp: Iterable[int] = [],
-        dropouta: float = 0.0,
+        hidden_sizes: Iterable[int] = [100, 100],
         learning_rate: float = 1e-3,
         polyak: float = 0.995,
     ):
 
-        self.ac = GTrXLActorCritic(
+        self.ac = LSTMActorCritic(
             rng = rng,
             dummy_obs_actor = dummy_obs_actor,
             dummy_obs_critic = dummy_obs_critic,
             obs_dim = obs_dim,
             act_dim = act_dim,
-            num_heads = num_heads, 
-            key_size = key_size, 
-            num_layers = num_layers, 
-            dropout = dropout, 
-            hidden_sizes_mlp = hidden_sizes_mlp,
-            dropouta = dropouta,
+            hidden_sizes = hidden_sizes,
         )
         self.optimizer = optax.adam(learning_rate)
         self.polyak = polyak
@@ -226,19 +178,18 @@ class GTrXLSAC():
         rng: chex.PRNGKey,
         data: Tuple[jnp.ndarray],
         params: Params,
-        memory: Memory,
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         # sample next action
-        a_t, logp_a_t, _ = self.ac.pi(rng1, obs_t, params.pi, False, memory.pi)
+        a_t, logp_a_t = self.ac.pi(rng1, obs_t, params.pi, False)
 
         a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(-1, 1, 1)], axis=1)
 
         # Target Q-values
-        q1_targ, _ = self.ac.q1(rng2, obs_t, a_t, params.q1_target, memory.q1_target)
-        q2_targ, _ = self.ac.q2(rng3, obs_t, a_t, params.q2_target, memory.q2_target)
+        q1_targ = self.ac.q1(rng2, obs_t, a_t, params.q1_target)
+        q2_targ = self.ac.q2(rng3, obs_t, a_t, params.q2_target)
         q_targ = jnp.concatenate([q1_targ.reshape(-1,1), q2_targ.reshape(-1,1)], axis=1).min(1)
         backup = r_t + discount_t * (q_targ - alpha * logp_a_t) # for last timestep should be only r_t?
         return jax.lax.stop_gradient(backup)
@@ -251,12 +202,11 @@ class GTrXLSAC():
         params: Params,
         rng: chex.PRNGKey,
         data: Tuple[jnp.ndarray],
-        memory: Memory,
         alpha: float = 0.2,
     ):
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
-        q1, _ = self.ac.q1(rng, obs_tm1, a_tm1, q1_params, memory.q1)
-        backup = self.bellman_backup(rng, data, params, memory, alpha)
+        q1 = self.ac.q1(rng, obs_tm1, a_tm1, q1_params)
+        backup = self.bellman_backup(rng, data, params, alpha)
         loss = ((q1 - backup)**2).mean()
         return loss
 
@@ -267,12 +217,11 @@ class GTrXLSAC():
         params: Params,
         rng: chex.PRNGKey,
         data: Tuple[jnp.ndarray],
-        memory: Memory,
         alpha: float = 0.2,
     ):
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
-        q2, _ = self.ac.q2(rng, obs_tm1, a_tm1, q2_params, memory.q2)
-        backup = self.bellman_backup(rng, data, params, memory, alpha)
+        q2 = self.ac.q2(rng, obs_tm1, a_tm1, q2_params)
+        backup = self.bellman_backup(rng, data, params, alpha)
         loss = ((q2 - backup)**2).mean()
         return loss
     
@@ -283,19 +232,18 @@ class GTrXLSAC():
         params: Params,
         rng: chex.PRNGKey,
         data: Tuple[jnp.ndarray],
-        memory: Memory,
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
         obs_tm1, a_history, _, _, _ = data
         # sample online a_tm1
-        a_tm1, logp_a_tm1, _ = self.ac.pi(rng1, obs_tm1, pi_params, False, memory.pi)
+        a_tm1, logp_a_tm1 = self.ac.pi(rng1, obs_tm1, pi_params, False)
 
         a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(-1, 1, 1)], axis=1)
 
         # Compute Q(o,a)
-        q1_pi, _ = self.ac.q1(rng2, obs_tm1, a_tm1, params.q1, memory.q1)
-        q2_pi, _ = self.ac.q2(rng3, obs_tm1, a_tm1, params.q2, memory.q2)
+        q1_pi = self.ac.q1(rng2, obs_tm1, a_tm1, params.q1)
+        q2_pi = self.ac.q2(rng3, obs_tm1, a_tm1, params.q2)
         q_pi = jnp.concatenate([q1_pi.reshape(-1,1), q2_pi.reshape(-1,1)], axis=1).min(1)
         # Entropy-regularized policy loss
         loss_pi = (alpha * logp_a_tm1 - q_pi).mean()
@@ -307,25 +255,21 @@ class GTrXLSAC():
         params: Params,
         rng: chex.PRNGKey,
         data: Tuple[jnp.ndarray],
-        memory: Memory,
         opt_states: OptStates,
         alpha: float = 0.2,
-    ) -> Tuple[Params, OptStates, Memory]:
+    ) -> Tuple[Params, OptStates]:
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         # Update q1
-        grads_q1 = jax.grad(self.loss_q1)(params.q1, params, rng1, data, memory, alpha)
-        _, memory_q1 = self.ac.q1(rng1, obs_tm1, a_tm1, params.q1, memory.q1)
+        grads_q1 = jax.grad(self.loss_q1)(params.q1, params, rng1, data, alpha)
         updates_q1, new_opt_state_q1 = self.optimizer.update(grads_q1, opt_states.q1)
         new_params_q1 = optax.apply_updates(params.q1, updates_q1)
         # Update q2
-        grads_q2 = jax.grad(self.loss_q2)(params.q2, params, rng2, data, memory, alpha)
-        _, memory_q2 = self.ac.q2(rng2, obs_tm1, a_tm1, params.q2, memory.q2)
+        grads_q2 = jax.grad(self.loss_q2)(params.q2, params, rng2, data, alpha)
         updates_q2, new_opt_state_q2 = self.optimizer.update(grads_q2, opt_states.q2)
         new_params_q2 = optax.apply_updates(params.q2, updates_q2)
         # Update pi
-        grads_pi = jax.grad(self.loss_pi)(params.pi, params, rng3, data, memory, alpha)
-        _, _, memory_pi = self.ac.pi(rng3, obs_tm1, params.pi, False, memory.pi)
+        grads_pi = jax.grad(self.loss_pi)(params.pi, params, rng3, data, alpha)
         updates_pi, new_opt_state_pi = self.optimizer.update(grads_pi, opt_states.pi)
         new_params_pi = optax.apply_updates(params.pi, updates_pi)
         # Update q1_target
@@ -337,9 +281,7 @@ class GTrXLSAC():
         new_params_q2_target = jax.tree_map(polyak_average, params.q2_target, new_params_q2)
         return(
             Params(new_params_pi, new_params_q1, new_params_q2, new_params_q1_target, new_params_q2_target),
-            OptStates(new_opt_state_pi, new_opt_state_q1, new_opt_state_q2),
-            Memory(memory_pi, memory_q1, memory_q2, None, None) 
-            #Memory(None, None, None, None, None)
+            OptStates(new_opt_state_pi, new_opt_state_q1, new_opt_state_q2)
         )
 
     def get_action(
@@ -347,10 +289,9 @@ class GTrXLSAC():
         rng: chex.PRNGKey,
         params: Params,
         obs: jnp.ndarray, # shape (batch_size, timesteps, features)
-        memory_pi_tm1: Tuple[jnp.ndarray] = None,
         deterministic: bool = False,
     ):
-        return self.ac.act(rng, obs, params.pi, deterministic, memory_pi_tm1)
+        return self.ac.act(rng, obs, params.pi, deterministic)
 
     
 
