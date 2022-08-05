@@ -3,7 +3,7 @@ import chex
 from typing import Tuple, Union, Optional, Dict
 from functools import partial
 from numpyro.distributions import StudentT
-from hmm_AR_k_Tstud import HMMStates, TruncatedNormalEmissionsAR_k
+from .hmm_AR_k_Tstud import HMMStates, TruncatedNormalEmissionsAR_k
 
 from jax import numpy as jnp
 
