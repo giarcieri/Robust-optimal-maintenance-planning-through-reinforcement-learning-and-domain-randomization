@@ -14,7 +14,7 @@ params = {
     "save_rewards": [False],
     "save_model": [False],
     "gridsearch": [True],
-    "keep_last_window_lenght_obs": [True], #[True]
+    "keep_last_window_lenght_obs": [False], #[True]
     "polyak": [0.995], #[0.995, 0.9]
 }
 
