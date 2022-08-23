@@ -20,12 +20,9 @@ parser.add_argument('-lr', '--learning_rate', type=float, metavar='',
                     required=True)
 parser.add_argument('-a', '--alpha', type=float, metavar='',
                     required=True)
-parser.add_argument('-sr', '--save_rewards', type=bool, metavar='',
-                    required=True)
-parser.add_argument('-sm', '--save_model', type=bool, metavar='',
-                    required=True)
-parser.add_argument('-gr', '--gridsearch', type=bool, metavar='',
-                    required=True)
+parser.add_argument('-sr', '--save_rewards')
+parser.add_argument('-sm', '--save_model')
+parser.add_argument('-gr', '--gridsearch')
 parser.add_argument('-pk', '--polyak', type=float, metavar='',
                     required=True)
 args = parser.parse_args()

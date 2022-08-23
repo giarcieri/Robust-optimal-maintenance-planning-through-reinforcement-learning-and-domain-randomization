@@ -2,8 +2,8 @@
 import subprocess
 
 params = {
-    "train_episodes": [10000], 
-    "test_episodes": [500], 
+    "train_episodes": [10000], #10000
+    "test_episodes": [500], #500
     "update_iterations": [10], #[1, 10]
     "gradient_descent_epochs": [1], #[1, 10]
     "num_heads": [8], #[2, 4, 8]
@@ -14,7 +14,7 @@ params = {
     "save_rewards": [False],
     "save_model": [False],
     "gridsearch": [True],
-    "keep_last_window_lenght_obs": [False], #[True]
+    "keep_last_window_lenght_obs": [True, False], #[True, False]
     "polyak": [0.995], #[0.995, 0.9]
 }
 
