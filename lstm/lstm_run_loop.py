@@ -143,7 +143,7 @@ def run_loop(
             env_params = sample_mean_params(trace)
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
-        hs_tm1 = jnp.array(0)
+        #hs_tm1 = jnp.array(0)
         obs_tm1_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_tm1_full_history = obs_tm1_full_history.at[:, step, :].set(obs_tm1)
@@ -200,7 +200,7 @@ def run_loop(
             env_params = sample_mean_params(trace)
         obs, hs = env.reset(next(rng), env_params)
         # start at hs 0 to initially limit variance
-        hs = jnp.array(0)
+        #hs = jnp.array(0)
         obs_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_full_history = obs_full_history.at[:, step, :].set(obs)

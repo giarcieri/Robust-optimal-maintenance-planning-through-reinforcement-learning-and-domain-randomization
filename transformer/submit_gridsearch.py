@@ -42,7 +42,7 @@ for i, combo in enumerate(combinations):
         inputs.append(f'--{v}')
         inputs.append(str(x))
     command = ['bsub'] + ['-o'] + ['transformer/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
-     ['200:00'] + ['-R'] + ['rusage[mem=4096]'] + ['python'] + ['-m'] + ['transformer.run_gridsearch'] + \
+     ['500:00'] + ['-R'] + ['rusage[mem=4096]'] + ['python'] + ['-m'] + ['transformer.run_gridsearch'] + \
         ['--seed'] + [str(0)] + inputs
     #command = ['python'] + ['-m'] + ['transformer.run_gridsearch'] + ['--seed'] + [str(0)] + inputs
     out = subprocess.run(command)

@@ -20,8 +20,12 @@ if args.function == 'transformer':
         config = json.load(config_file)
     with open("transformer/logs.txt", "a") as f:
         f.write(f"Running seed {seed}\n")
-else:
-    raise NotImplementedError
+elif args.function == 'lstm':
+    from lstm.lstm_run_loop import *
+    with open('lstm/config.json') as config_file:
+        config = json.load(config_file)
+    with open("lstm/logs.txt", "a") as f:
+        f.write(f"Running seed {seed}\n")
 
 file = 'trace.pickle'
 with open(file, "rb") as fp:
