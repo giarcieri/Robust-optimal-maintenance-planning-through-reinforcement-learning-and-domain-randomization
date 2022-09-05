@@ -8,7 +8,7 @@ params = {
     "gradient_descent_epochs": [1], #[1, 10]
     "num_heads": [8], #[2, 4, 8]
     "num_layers": [8, 12], #[2, 4, 8]
-    "hidden_sizes_mlp": [[100], [100, 100]], #[[], [100]]
+    "hidden_sizes_mlp": [[100], [100, 100]], #[[], [100], [100, 100]]
     "learning_rate": [1e-3], #[1e-3, 5e-4, 1e-4]
     "alpha": [0.1],  #[0.2, 0.1]
     "save_rewards": [False],
@@ -16,6 +16,7 @@ params = {
     "gridsearch": [True],
     "keep_last_window_lenght_obs": [True, False], #[True, False]
     "polyak": [0.995], #[0.995, 0.9]
+    "replay_size": [int(1e6)]
 }
 
 # Create all possible permutations
@@ -34,7 +35,8 @@ for v1 in params['train_episodes']:
                                             for v12 in params['gridsearch']:
                                                 for v13 in params['keep_last_window_lenght_obs']:
                                                     for v14 in params['polyak']:
-                                                        combinations.append([v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14])
+                                                        for v15 in params['replay_size']:
+                                                            combinations.append([v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15])
 
 for i, combo in enumerate(combinations):
     inputs = []

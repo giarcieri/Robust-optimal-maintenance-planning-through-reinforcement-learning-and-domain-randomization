@@ -25,6 +25,8 @@ parser.add_argument('-sm', '--save_model')
 parser.add_argument('-gr', '--gridsearch')
 parser.add_argument('-pk', '--polyak', type=float, metavar='',
                     required=True)
+parser.add_argument('-rs', '--replay_size', type=int, metavar='',
+                    required=True)
 args = parser.parse_args()
 
 

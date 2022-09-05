@@ -1,121 +1,126 @@
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -15216 std 11506
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -69431 std 93528
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -69431 std 93528
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -15136 std 11445
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -65093 std 85241
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -65093 std 85241
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -15216 std 11506
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -15136 std 11445
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -117420 std 9968
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -117420 std 9968
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -15136 std 11445
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -15136 std 11445
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -15136 std 11445
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -15136 std 11445
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -76002 std 96689
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -15820 std 11569
-update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -15820 std 11569
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -53136 std 68633
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -53136 std 68633
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -64132 std 87700
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -69421 std 93509
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -14182 std 10424
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -64128 std 87702
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -69421 std 93509
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -64132 std 87700
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -14182 std 10424
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -14583 std 10400
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -60573 std 17142
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -60573 std 17142
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -14583 std 10400
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -64127 std 87703
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -64127 std 87703
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -69421 std 93509
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -116442 std 9273
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -69421 std 93509
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -116442 std 9273
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -117420 std 9968
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -117420 std 9968
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -117420 std 9968
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -117420 std 9968
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -65256 std 88902
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -65256 std 88902
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -64128 std 87702
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -116442 std 9273
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -13835 std 10072
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -69421 std 93509
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -117420 std 9968
-update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -69421 std 93509
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -116281 std 8987
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -65256 std 88902
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -65256 std 88902
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -116281 std 8987
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -13835 std 10072
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -116285 std 8989
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -65256 std 88902
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -65256 std 88902
-update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -65256 std 88902
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -119928 std 10723
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -119928 std 10723
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -119928 std 10723
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -119928 std 10723
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -119928 std 10723
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -133755 std 134024
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -119928 std 10723
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -18466 std 13180
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -26175 std 24972
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -76791 std 104628
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -76791 std 104628
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -90063 std 86058
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -119442 std 10760
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -17824 std 12876
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -17824 std 12876
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -84735 std 114020
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -17824 std 12876
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -17824 std 12876
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -131442 std 134206
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -125084 std 133313
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -125084 std 133313
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -118329 std 9988
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -131442 std 134206
+update_iterations 1 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -131442 std 134206
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -99911 std 118167
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -16483 std 11663
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -16483 std 11663
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -16483 std 11663
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -118296 std 9967
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -125084 std 133313
+update_iterations 10 gradient_descent_epochs 1 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -118329 std 9988
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -118259 std 9854
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -118259 std 9854
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -122417 std 130298
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -122417 std 130298
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.9: mean -122413 std 130301
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.995: mean -122413 std 130301
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.2 polyak 0.995: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -122413 std 130301
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.1 polyak 0.9: mean -122413 std 130301
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.001 alpha 0.1 polyak 0.9: mean -16472 std 12245
+update_iterations 10 gradient_descent_epochs 10 hidden_sizes [500, 500] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -122413 std 130301

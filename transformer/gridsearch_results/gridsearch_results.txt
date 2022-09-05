@@ -163,3 +163,6 @@ update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 8 hidden_s
 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 8 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True: mean -14410 std 10908
 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 8 hidden_sizes_mlp [100] learning_rate 0.0005 alpha 0.2 polyak 0.9 keep_last_window_lenght_obs True: mean -16483 std 11663
 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 8 hidden_sizes_mlp [100] learning_rate 0.0005 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True: mean -16483 std 11663
+update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 8 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.995 keep_last_window_lenght_obs True: mean -14410 std 10908
+update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 12 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.995 keep_last_window_lenght_obs True: mean -16483 std 11663
+update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 12 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.995 keep_last_window_lenght_obs False: mean -16483 std 11663

@@ -236,6 +236,6 @@ def run_loop(
             pickle.dump(params_memory, fp)
     if gridsearch:
         with open("lstm/gridsearch_results/gridsearch_results.txt", "a") as f:
-            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} hidden_sizes {hidden_sizes} learning_rate {learning_rate} alpha {alpha} polyak {polyak}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
+            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} hidden_sizes {hidden_sizes} learning_rate {learning_rate} alpha {alpha} polyak {polyak} replay_size {replay_size}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
 
         

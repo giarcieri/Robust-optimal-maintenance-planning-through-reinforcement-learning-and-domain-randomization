@@ -1,0 +1,194 @@
+Sender: LSF System <lsfadmin@eu-g1-006-1>
+Subject: Job 229673163: <python -m transformer.submit_gridsearch> in cluster <euler> Done
+
+Job <python -m transformer.submit_gridsearch> was submitted from host <eu-login-22> by user <garcieri> in cluster <euler> at Tue Aug 23 15:16:16 2022
+Job was executed on host(s) <eu-g1-006-1>, in queue <normal.4h>, as user <garcieri> in cluster <euler> at Tue Aug 23 15:16:37 2022
+</cluster/home/garcieri> was used as the home directory.
+</cluster/home/garcieri/rlfr/Robust-optimal-maintenance-planning-through-reinforcement-learning-and-domain-randomization> was used as the working directory.
+Started at Tue Aug 23 15:16:37 2022
+Terminated at Tue Aug 23 15:16:54 2022
+Results reported at Tue Aug 23 15:16:54 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python -m transformer.submit_gridsearch
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1.92 sec.
+    Max Memory :                                 22 MB
+    Average Memory :                             20.00 MB
+    Total Requested Memory :                     2048.00 MB
+    Delta Memory :                               2026.00 MB
+    Max Swap :                                   -
+    Max Processes :                              8
+    Max Threads :                                9
+    Run time :                                   35 sec.
+    Turnaround time :                            38 sec.
+
+The output (if any) follows:
+
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673176> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673178> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673180> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673181> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673182> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673183> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673185> is submitted to queue <normal.30d>.
+Warning: jobs longer than 5 days may be terminated at any time for operational reasons.
+Generic job.
+Job <229673186> is submitted to queue <normal.30d>.
+Sender: LSF System <lsfadmin@eu-g1-003-2>
+Subject: Job 229673176: <python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 8 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs True --polyak 0.995> in cluster <euler> Done
+
+Job <python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 8 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs True --polyak 0.995> was submitted from host <eu-g1-006-1> by user <garcieri> in cluster <euler> at Tue Aug 23 15:16:52 2022
+Job was executed on host(s) <2*eu-g1-003-2>, in queue <normal.30d>, as user <garcieri> in cluster <euler> at Tue Aug 30 06:01:20 2022
+</cluster/home/garcieri> was used as the home directory.
+</cluster/home/garcieri/rlfr/Robust-optimal-maintenance-planning-through-reinforcement-learning-and-domain-randomization> was used as the working directory.
+Started at Tue Aug 30 06:01:20 2022
+Terminated at Thu Sep  1 10:13:28 2022
+Results reported at Thu Sep  1 10:13:28 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 8 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs True --polyak 0.995
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   221098.50 sec.
+    Max Memory :                                 6948 MB
+    Average Memory :                             4308.81 MB
+    Total Requested Memory :                     8192.00 MB
+    Delta Memory :                               1244.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                41
+    Run time :                                   187928 sec.
+    Turnaround time :                            759396 sec.
+
+The output (if any) follows:
+
+/cluster/home/garcieri/miniconda3/envs/rlfr/lib/python3.8/site-packages/jax/experimental/optimizers.py:28: FutureWarning: jax.experimental.optimizers is deprecated, import jax.example_libraries.optimizers instead
+  warnings.warn('jax.experimental.optimizers is deprecated, '
+/cluster/home/garcieri/miniconda3/envs/rlfr/lib/python3.8/site-packages/jax/experimental/stax.py:28: FutureWarning: jax.experimental.stax is deprecated, import jax.example_libraries.stax instead
+  warnings.warn('jax.experimental.stax is deprecated, '
+WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
+2022-08-30 06:05:37.915419: E external/org_tensorflow/tensorflow/compiler/xla/service/slow_operation_alarm.cc:61] 
+********************************
+Very slow compile?  If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+Compiling module jit_update.154362
+********************************
+Sender: LSF System <lsfadmin@eu-g1-003-3>
+Subject: Job 229673182: <python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 12 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs True --polyak 0.995> in cluster <euler> Done
+
+Job <python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 12 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs True --polyak 0.995> was submitted from host <eu-g1-006-1> by user <garcieri> in cluster <euler> at Tue Aug 23 15:16:53 2022
+Job was executed on host(s) <2*eu-g1-003-3>, in queue <normal.30d>, as user <garcieri> in cluster <euler> at Thu Sep  1 10:14:10 2022
+</cluster/home/garcieri> was used as the home directory.
+</cluster/home/garcieri/rlfr/Robust-optimal-maintenance-planning-through-reinforcement-learning-and-domain-randomization> was used as the working directory.
+Started at Thu Sep  1 10:14:10 2022
+Terminated at Mon Sep  5 07:34:00 2022
+Results reported at Mon Sep  5 07:34:00 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 12 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs True --polyak 0.995
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   384343.38 sec.
+    Max Memory :                                 13626 MB
+    Average Memory :                             7702.43 MB
+    Total Requested Memory :                     8192.00 MB
+    Delta Memory :                               -5434.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                41
+    Run time :                                   336002 sec.
+    Turnaround time :                            1095427 sec.
+
+The output (if any) follows:
+
+/cluster/home/garcieri/miniconda3/envs/rlfr/lib/python3.8/site-packages/jax/experimental/optimizers.py:28: FutureWarning: jax.experimental.optimizers is deprecated, import jax.example_libraries.optimizers instead
+  warnings.warn('jax.experimental.optimizers is deprecated, '
+/cluster/home/garcieri/miniconda3/envs/rlfr/lib/python3.8/site-packages/jax/experimental/stax.py:28: FutureWarning: jax.experimental.stax is deprecated, import jax.example_libraries.stax instead
+  warnings.warn('jax.experimental.stax is deprecated, '
+WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
+2022-09-01 10:19:46.565173: E external/org_tensorflow/tensorflow/compiler/xla/service/slow_operation_alarm.cc:61] 
+********************************
+Very slow compile?  If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+Compiling module jit_update.227914
+********************************
+Sender: LSF System <lsfadmin@eu-g1-003-3>
+Subject: Job 229673183: <python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 12 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs False --polyak 0.995> in cluster <euler> Done
+
+Job <python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 12 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs False --polyak 0.995> was submitted from host <eu-g1-006-1> by user <garcieri> in cluster <euler> at Tue Aug 23 15:16:53 2022
+Job was executed on host(s) <2*eu-g1-003-3>, in queue <normal.30d>, as user <garcieri> in cluster <euler> at Thu Sep  1 12:02:58 2022
+</cluster/home/garcieri> was used as the home directory.
+</cluster/home/garcieri/rlfr/Robust-optimal-maintenance-planning-through-reinforcement-learning-and-domain-randomization> was used as the working directory.
+Started at Thu Sep  1 12:02:58 2022
+Terminated at Mon Sep  5 09:36:34 2022
+Results reported at Mon Sep  5 09:36:34 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python -m transformer.run_gridsearch --seed 0 --train_episodes 10000 --test_episodes 500 --update_iterations 10 --gradient_descent_epochs 1 --num_heads 8 --num_layers 12 --hidden_sizes_mlp [100] --learning_rate 0.001 --alpha 0.1 --save_rewards False --save_model False --gridsearch True --keep_last_window_lenght_obs False --polyak 0.995
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   385249.47 sec.
+    Max Memory :                                 12980 MB
+    Average Memory :                             7063.42 MB
+    Total Requested Memory :                     8192.00 MB
+    Delta Memory :                               -4788.00 MB
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                41
+    Run time :                                   336832 sec.
+    Turnaround time :                            1102781 sec.
+
+The output (if any) follows:
+
+/cluster/home/garcieri/miniconda3/envs/rlfr/lib/python3.8/site-packages/jax/experimental/optimizers.py:28: FutureWarning: jax.experimental.optimizers is deprecated, import jax.example_libraries.optimizers instead
+  warnings.warn('jax.experimental.optimizers is deprecated, '
+/cluster/home/garcieri/miniconda3/envs/rlfr/lib/python3.8/site-packages/jax/experimental/stax.py:28: FutureWarning: jax.experimental.stax is deprecated, import jax.example_libraries.stax instead
+  warnings.warn('jax.experimental.stax is deprecated, '
+WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
+2022-09-01 12:08:29.535777: E external/org_tensorflow/tensorflow/compiler/xla/service/slow_operation_alarm.cc:61] 
+********************************
+Very slow compile?  If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+Compiling module jit_update.227914
+********************************
