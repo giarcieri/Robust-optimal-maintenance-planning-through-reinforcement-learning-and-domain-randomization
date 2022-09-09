@@ -94,9 +94,6 @@ def run_loop(
     save_rewards: bool = True,
     save_model: bool = True,
     gridsearch: bool = False,
-    #agent?
-    #env?
-    #replay_buffer?
 
 ):
     rng = hk.PRNGSequence(seed)
@@ -145,8 +142,8 @@ def run_loop(
     # Train Loop
     start_time = time.time()
     tot_train_ep_returns = []
-    with open("transformer/logs.txt", "a") as f:
-        f.write(f"Start training loop\n")
+    #with open("transformer/logs.txt", "a") as f:
+    #    f.write(f"Start training loop\n")
     for train_episode in range(train_episodes):
         memory = Memory(None, None, None, None, None)
         train_ep_return = 0
@@ -155,8 +152,6 @@ def run_loop(
         else:
             env_params = sample_mean_params(trace)
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
-        # start at hs 0 to initially limit variance
-        #hs_tm1 = jnp.array(0)
         obs_tm1_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_tm1_full_history = obs_tm1_full_history.at[:, step, :].set(obs_tm1)
@@ -180,13 +175,11 @@ def run_loop(
             #print(f'Episode {train_episode} Step {step}: o_tm1 {obs_tm1.round(2)}, hs_tm1 {hs_tm1}, a_tm1 {a_tm1}, r_t {r_t}')
             obs_tm1, hs_tm1 = obs_t, hs_t
             memory = Memory(memory_pi_tm1, None, None, None, None)
-            # Let's try without memory
-            #memory = Memory(None, None, None, None, None)
         #print(f'Episode {train_episode} total return {train_ep_return}')
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
-            with open("transformer/logs.txt", "a") as f:
-                f.write(f"Update\n")
+            #with open("transformer/logs.txt", "a") as f:
+            #    f.write(f"Update\n")
             for _ in range(update_every*update_iterations):
                 memory = Memory(None, None, None, None, None)
                 idxs = jax.random.randint(next(rng), shape=(batch_size,), minval=0, maxval=buffer.size_buffer)
@@ -200,8 +193,6 @@ def run_loop(
                         opt_states = opt_states,
                         alpha = alpha,
                     )
-                    # Let's try without memory
-                    #memory = Memory(None, None, None, None, None)
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
@@ -213,8 +204,8 @@ def run_loop(
     # Test
     start_time = time.time() 
     tot_test_ep_returns = []
-    with open("transformer/logs.txt", "a") as f:
-        f.write(f"Starting test\n")
+    #with open("transformer/logs.txt", "a") as f:
+    #    f.write(f"Starting test\n")
     for test_episode in range(test_episodes):
         memory_tm1 = None
         test_ep_return = 0
@@ -223,8 +214,6 @@ def run_loop(
         else:
             env_params = sample_mean_params(trace)
         obs, hs = env.reset(next(rng), env_params)
-        # start at hs 0 to initially limit variance
-        #hs = jnp.array(0)
         obs_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_full_history = obs_full_history.at[:, step, :].set(obs)
@@ -242,7 +231,6 @@ def run_loop(
                 memory_pi_tm1 = memory_tm1,
                 deterministic = True,
             )
-            #memory_tm1 = None
             #print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
             obs, hs, r, _, _ = env.step(next(rng), hs, obs, a.squeeze(), env_params)
             test_ep_return += r

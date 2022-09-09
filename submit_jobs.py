@@ -2,6 +2,8 @@ import subprocess
 import argparse
 import jax
 
+from time import sleep
+
 parser = argparse.ArgumentParser(description='rlfr')
 parser.add_argument('-n', '--n_seeds', type=int, metavar='',
                     required=True, help='number seeds')
@@ -13,6 +15,7 @@ devices = jax.local_device_count()
 seeds = int(args.n_seeds)
 
 for i in range(seeds):
-    command = ['bsub'] + ['-o'] + ['output.txt'] + ['-n'] + ['2'] + ['-W'] + ['500:00'] + \
-        ['-R'] + ['rusage[mem=2048]'] + ['python'] + ['main.py'] +  ['--seed'] + [f'{i}'] + ['--function'] + [f'{args.function}']
+    command = ['bsub'] + ['-o'] + ['output.txt'] + ['-n'] + ['2'] + ['-W'] + ['75:00'] + \
+        ['-R'] + ['rusage[mem=4096]'] + ['python'] + ['main.py'] +  ['--seed'] + [f'{i}'] + ['--function'] + [f'{args.function}']
     out = subprocess.run(command)
+    sleep(60)

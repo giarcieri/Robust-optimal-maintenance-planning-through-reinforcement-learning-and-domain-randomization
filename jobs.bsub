@@ -5,4 +5,4 @@
 #BSUB -J rlfr_main
 #BSUB -o output.txt
 
-python submit_jobs.py --n_seeds 10 --function transformer
+python submit_jobs.py --n_seeds 1000 --function transformer
