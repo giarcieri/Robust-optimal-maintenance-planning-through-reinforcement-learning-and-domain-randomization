@@ -6,16 +6,16 @@ params = {
     "test_episodes": [500], #500
     "update_iterations": [10], #[1, 10]
     "gradient_descent_epochs": [1], #[1, 10]
-    "num_heads": [8], #[2, 4, 8]
-    "num_layers": [8, 12], #[2, 4, 8]
-    "hidden_sizes_mlp": [[100], [100, 100]], #[[], [100], [100, 100]]
+    "num_heads": [4, 8], #[2, 4, 8]
+    "num_layers": [2, 4, 8], #[2, 4, 8]
+    "hidden_sizes_mlp": [[], [100]], #[[], [100], [100, 100]]
     "learning_rate": [1e-3], #[1e-3, 5e-4, 1e-4]
-    "alpha": [0.1],  #[0.2, 0.1]
+    "alpha": [0.1, 0.2],  #[0.2, 0.1]
     "save_rewards": [False],
     "save_model": [False],
     "gridsearch": [True],
     "keep_last_window_lenght_obs": [True, False], #[True, False]
-    "polyak": [0.995], #[0.995, 0.9]
+    "polyak": [0.995, 0.9], #[0.995, 0.9]
     "replay_size": [int(1e6)]
 }
 
@@ -44,7 +44,7 @@ for i, combo in enumerate(combinations):
         inputs.append(f'--{v}')
         inputs.append(str(x))
     command = ['bsub'] + ['-o'] + ['transformer/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
-     ['500:00'] + ['-R'] + ['rusage[mem=4096]'] + ['python'] + ['-m'] + ['transformer.run_gridsearch'] + \
-        ['--seed'] + [str(0)] + inputs
+     ['100:00'] + ['-R'] + ['rusage[mem=4096]'] + ['python'] + ['-m'] + ['transformer.run_gridsearch'] + \
+        ['--seed'] + [str(732)] + inputs
     #command = ['python'] + ['-m'] + ['transformer.run_gridsearch'] + ['--seed'] + [str(0)] + inputs
     out = subprocess.run(command)

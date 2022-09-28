@@ -1,6 +1,6 @@
 #!/bin/bash
 #BSUB -n 1                  
-#BSUB -W 1:00                 
+#BSUB -W 30:00                 
 #BSUB -R "rusage[mem=2048]"    
 #BSUB -J rlfr_main
 #BSUB -o output.txt
