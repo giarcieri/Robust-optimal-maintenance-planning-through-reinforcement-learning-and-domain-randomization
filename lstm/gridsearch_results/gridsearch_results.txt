@@ -1,3 +1,4 @@
+seed 0 train_episodes 10000
 update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.995: mean -18466 std 13180
 update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.1 polyak 0.995: mean -18466 std 13180
 update_iterations 1 gradient_descent_epochs 1 hidden_sizes [100] learning_rate 0.0005 alpha 0.2 polyak 0.9: mean -18466 std 13180

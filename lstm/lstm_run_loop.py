@@ -133,8 +133,8 @@ def run_loop(
     # Train Loop
     start_time = time.time()
     tot_train_ep_returns = []
-    with open("lstm/logs.txt", "a") as f:
-        f.write(f"Start training loop\n")
+    #with open("lstm/logs.txt", "a") as f:
+    #    f.write(f"Start training loop\n")
     for train_episode in range(train_episodes):
         train_ep_return = 0
         if domain_randomization:
@@ -166,8 +166,8 @@ def run_loop(
         #print(f'Episode {train_episode} total return {train_ep_return}')
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
-            with open("lstm/logs.txt", "a") as f:
-                f.write(f"Update\n")
+            #with open("lstm/logs.txt", "a") as f:
+            #    f.write(f"Update\n")
             for _ in range(update_every*update_iterations):
                 idxs = jax.random.randint(next(rng), shape=(batch_size,), minval=0, maxval=buffer.size_buffer)
                 batch = buffer.batch_sample(idxs)
@@ -190,8 +190,8 @@ def run_loop(
     # Test
     start_time = time.time() 
     tot_test_ep_returns = []
-    with open("lstm/logs.txt", "a") as f:
-        f.write(f"Starting test\n")
+    #with open("lstm/logs.txt", "a") as f:
+    #    f.write(f"Starting test\n")
     for test_episode in range(test_episodes):
         test_ep_return = 0
         if domain_randomization_test:
@@ -236,6 +236,6 @@ def run_loop(
             pickle.dump(params_memory, fp)
     if gridsearch:
         with open("lstm/gridsearch_results/gridsearch_results.txt", "a") as f:
-            f.write(f"update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} hidden_sizes {hidden_sizes} learning_rate {learning_rate} alpha {alpha} polyak {polyak} replay_size {replay_size}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
+            f.write(f"seed {seed} train_episodes {train_episodes} update_iterations {update_iterations} gradient_descent_epochs {gradient_descent_epochs} hidden_sizes {hidden_sizes} learning_rate {learning_rate} alpha {alpha} polyak {polyak} replay_size {replay_size}: mean {int(jnp.asarray(tot_test_ep_returns).mean())} std {int(jnp.asarray(tot_test_ep_returns).std())}\n")
 
         
