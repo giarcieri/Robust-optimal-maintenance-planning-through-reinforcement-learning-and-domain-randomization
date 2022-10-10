@@ -2,6 +2,7 @@ import argparse
 import pickle
 import ast
 from .transformer_run_loop import *
+from jax.lib import xla_bridge
 
 parser = argparse.ArgumentParser(description='rlfr')
 parser.add_argument('-i', '--seed', type=int, metavar='',
@@ -58,6 +59,8 @@ reward_matrix = jnp.asarray([
     [reward_a_R2 + reward_s_0, reward_a_R2 + reward_s_1, reward_a_R2 + reward_s_2, reward_a_R2 + reward_s_3],
     [1*reward_a_A1 + reward_a_R2 + reward_s_0, 1.33*reward_a_A1 + reward_a_R2 + reward_s_1, 1.66*reward_a_A1 + reward_a_R2 + reward_s_2, 2*reward_a_A1 + reward_a_R2 + reward_s_3]
 ])
+
+print("Running on", xla_bridge.get_backend().platform)
 
 run_loop(trace=trace, reward_matrix=reward_matrix, domain_randomization=False, window_length=5, 
         domain_randomization_test=False, **config)

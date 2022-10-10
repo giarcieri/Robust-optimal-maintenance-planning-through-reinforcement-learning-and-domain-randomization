@@ -3,8 +3,8 @@
 import subprocess
 
 params = {
-    "seed": [732],
-    "train_episodes": [20000, 40000], #10000
+    "seed": [0, 732, 318, 698],
+    "train_episodes": [60000], #10000
     "test_episodes": [500], #500
     "update_iterations": [10], #[1, 10]
     "gradient_descent_epochs": [1], #[1, 10]

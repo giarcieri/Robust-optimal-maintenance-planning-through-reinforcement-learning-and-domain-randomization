@@ -188,3 +188,7 @@ update_iterations 20 gradient_descent_epochs 20 hidden_sizes [200, 200, 200] lea
 update_iterations 20 gradient_descent_epochs 20 hidden_sizes [200, 200, 200] learning_rate 0.001 alpha 0.01 polyak 0.995 replay_size 1000: mean -17495 std 11708
 update_iterations 20 gradient_descent_epochs 20 hidden_sizes [200, 200, 200] learning_rate 0.001 alpha 0.2 polyak 0.7 replay_size 1000: mean -128680 std 129912
 update_iterations 20 gradient_descent_epochs 20 hidden_sizes [200, 200, 200] learning_rate 0.001 alpha 0.01 polyak 0.7 replay_size 1000: mean -17495 std 11708
+seed 0 train_episodes 20000 update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995 replay_size 1000000: mean -118583 std 10088
+seed 0 train_episodes 20000 update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995 replay_size 1000000: mean -16712 std 11440
+seed 0 train_episodes 30000 update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995 replay_size 1000000: mean -120719 std 131935
+seed 0 train_episodes 30000 update_iterations 10 gradient_descent_epochs 10 hidden_sizes [100, 100, 100] learning_rate 0.001 alpha 0.1 polyak 0.995 replay_size 1000000: mean -17682 std 13622
