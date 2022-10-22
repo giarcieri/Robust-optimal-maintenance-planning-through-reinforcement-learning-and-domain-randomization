@@ -216,13 +216,17 @@ def _deterioration_process(key, state, obs, params):
 
 def deterioration_process(key, state, obs, params):
     sample = _deterioration_process(key, state, obs, params)
-    def true_fun(key):
-        return sample + obs
-    def false_fun(key):
+    def cond_fun(input):
+        sample, key = input
+        return sample > -obs
+    def body_fun(input):
+        sample, key = input
         key, _ = jax.random.split(key)
-        return _deterioration_process(key, state, obs, params)
-    pred = lambda x: x < -obs
-    return jax.lax.cond(pred(sample), true_fun, false_fun, key)
+        sample = _deterioration_process(key, state, obs, params)
+        return (sample, key)
+    final_val = jax.lax.while_loop(cond_fun, body_fun, (sample, key))
+    sample, key = final_val
+    return sample + obs
 
 def _repair_process(key, state, obs, action, params): 
     mu_r, sigma_r, nu_r, k = params['mu_r'][state], params['sigma_r'][state], params['nu_r'][state], params['k'][action-1]
@@ -230,13 +234,17 @@ def _repair_process(key, state, obs, action, params):
 
 def repair_process(key, state, obs, action, params): 
     sample = _repair_process(key, state, obs, action, params)
-    def true_fun(key):
-        return sample
-    def false_fun(key):
+    def cond_fun(input):
+        sample, key = input
+        return sample > 0.0
+    def body_fun(input):
+        sample, key = input
         key, _ = jax.random.split(key)
-        return _repair_process(key, state, obs, action, params)
-    pred = lambda x: x < 0.0
-    return jax.lax.cond(pred(sample), true_fun, false_fun, key)
+        sample = _repair_process(key, state, obs, action, params)
+        return (sample, key)
+    final_val = jax.lax.while_loop(cond_fun, body_fun, (sample, key))
+    sample, key = final_val
+    return sample
     
 
 def _init_process(key, state, params):
@@ -245,13 +253,17 @@ def _init_process(key, state, params):
 
 def init_process(key, state, params):
     sample = _init_process(key, state, params)
-    def true_fun(key):
-        return sample
-    def false_fun(key):
+    def cond_fun(input):
+        sample, key = input
+        return sample > 0.0
+    def body_fun(input):
+        sample, key = input
         key, _ = jax.random.split(key)
-        return _init_process(key, state, params)
-    pred = lambda x: x < 0.0
-    return jax.lax.cond(pred(sample), true_fun, false_fun, key)
+        sample = _init_process(key, state, params)
+        return (sample, key)
+    final_val = jax.lax.while_loop(cond_fun, body_fun, (sample, key))
+    sample, key = final_val
+    return sample
     
 
 def sample_params(key, trace): 

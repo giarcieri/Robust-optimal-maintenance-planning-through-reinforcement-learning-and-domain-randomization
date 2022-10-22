@@ -1,4 +1,5 @@
 import collections
+from typing import Optional
 import chex
 import distrax
 import optax
@@ -9,6 +10,9 @@ from .lstm import *
 Params = collections.namedtuple("Params", "pi q1 q2 q1_target q2_target")
 OptStates = collections.namedtuple("OptStates", "pi q1 q2")
 
+@jax.jit
+def inner1d(X, Y):
+  return (X * Y).sum(-1)
 
 class LSTMActor():
     """LSTM Policy Network"""
@@ -42,7 +46,7 @@ class LSTMActor():
             log_pi = log_probs.max(-1)
         else:
             pi_action, log_pi = categorical_dist.sample_and_log_prob(seed=rng)
-        return pi_action, log_pi
+        return pi_action, log_pi, categorical_dist.probs
 
     @property
     def init_params(
@@ -60,9 +64,10 @@ class LSTMCritic():
         rng: chex.PRNGKey,
         dummy_obs: jnp.ndarray,
         hidden_sizes: Iterable[int] = [100, 100],
+        act_dim: Optional[int] = 3
     ):
         def nn_func():
-            return apply_DeepLSTM(hidden_units=hidden_sizes, output_units=1)
+            return apply_DeepLSTM(hidden_units=hidden_sizes, output_units=act_dim)
 
         self.nn = hk.multi_transform(nn_func)
         self._init_params = self.nn.init(rng, dummy_obs)
@@ -77,12 +82,12 @@ class LSTMCritic():
         self,
         rng: chex.PRNGKey,
         obs: jnp.ndarray,
-        act: jnp.ndarray,
+        #act: jnp.ndarray,
         params: hk.Params,
     ):
-        inputs = jnp.concatenate([obs, act], axis=-1)
-        q_values = self.nn.apply.forward(params, rng, inputs)
-        return q_values.squeeze()
+        #inputs = jnp.concatenate([obs, act], axis=-1)
+        q_values = self.nn.apply.forward(params, rng, obs)#[:, act]
+        return q_values#.squeeze()
 
 
 
@@ -109,11 +114,13 @@ class LSTMActorCritic():
             rng = rng2,
             dummy_obs = dummy_obs_critic,
             hidden_sizes = hidden_sizes,
+            act_dim = act_dim,
         )
         self.q2 = LSTMCritic(
             rng = rng3,
             dummy_obs = dummy_obs_critic,
-            hidden_sizes = hidden_sizes
+            hidden_sizes = hidden_sizes,
+            act_dim = act_dim,
         )
 
     def init_params(
@@ -128,7 +135,7 @@ class LSTMActorCritic():
         params: hk.Params,
         deterministic: bool = False,
     ):
-        action, _ = self.pi(rng, obs, params, deterministic)
+        action, _, _ = self.pi(rng, obs, params, deterministic)
         return action
 
 class LSTMSAC():
@@ -156,6 +163,7 @@ class LSTMSAC():
         )
         self.optimizer = optax.adam(learning_rate)
         self.polyak = polyak
+        self.act_dim = act_dim
 
     def init_params(
         self,
@@ -181,17 +189,19 @@ class LSTMSAC():
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
-        obs_tm1, a_tm1, r_t, discount_t, obs_t = data
+        _, _, r_t, discount_t, obs_t = data
         # sample next action
-        a_t, logp_a_t = self.ac.pi(rng1, obs_t, params.pi, False)
+        #a_t, logp_a_t = self.ac.pi(rng1, obs_t, params.pi, False)
+        _, _, probs = self.ac.pi(rng1, obs_t, params.pi, False)
 
-        a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(-1, 1, 1)], axis=1)
+        #a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(-1, 1, 1)], axis=1)
 
         # Target Q-values
-        q1_targ = self.ac.q1(rng2, obs_t, a_t, params.q1_target)
-        q2_targ = self.ac.q2(rng3, obs_t, a_t, params.q2_target)
-        q_targ = jnp.concatenate([q1_targ.reshape(-1,1), q2_targ.reshape(-1,1)], axis=1).min(1)
-        backup = r_t + discount_t * (q_targ - alpha * logp_a_t) # for last timestep should be only r_t?
+        q1_targ = self.ac.q1(rng2, obs_t, params.q1_target)
+        q2_targ = self.ac.q2(rng3, obs_t, params.q2_target)
+        q_targ = jnp.concatenate([q1_targ.reshape(-1,self.act_dim,1), q2_targ.reshape(-1,self.act_dim,1)], axis=2).min(2)
+        soft_V = inner1d(probs, q_targ - alpha * jnp.log(probs)) # Eq. 10
+        backup = r_t + discount_t * soft_V 
         return jax.lax.stop_gradient(backup)
 
 
@@ -204,8 +214,8 @@ class LSTMSAC():
         data: Tuple[jnp.ndarray],
         alpha: float = 0.2,
     ):
-        obs_tm1, a_tm1, r_t, discount_t, obs_t = data
-        q1 = self.ac.q1(rng, obs_tm1, a_tm1, q1_params)
+        obs_tm1, a_tm1, _, _, _ = data
+        q1 = self.ac.q1(rng, obs_tm1, q1_params)[:, a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, alpha)
         loss = ((q1 - backup)**2).mean()
         return loss
@@ -219,8 +229,8 @@ class LSTMSAC():
         data: Tuple[jnp.ndarray],
         alpha: float = 0.2,
     ):
-        obs_tm1, a_tm1, r_t, discount_t, obs_t = data
-        q2 = self.ac.q2(rng, obs_tm1, a_tm1, q2_params)
+        obs_tm1, a_tm1, _, _, _ = data
+        q2 = self.ac.q2(rng, obs_tm1, q2_params)[:, a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, alpha)
         loss = ((q2 - backup)**2).mean()
         return loss
@@ -235,18 +245,18 @@ class LSTMSAC():
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
-        obs_tm1, a_history, _, _, _ = data
+        obs_tm1, _, _, _, _ = data
         # sample online a_tm1
-        a_tm1, logp_a_tm1 = self.ac.pi(rng1, obs_tm1, pi_params, False)
+        _, _, probs = self.ac.pi(rng1, obs_tm1, pi_params, False)
 
-        a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(-1, 1, 1)], axis=1)
+        #a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(-1, 1, 1)], axis=1)
 
         # Compute Q(o,a)
-        q1_pi = self.ac.q1(rng2, obs_tm1, a_tm1, params.q1)
-        q2_pi = self.ac.q2(rng3, obs_tm1, a_tm1, params.q2)
-        q_pi = jnp.concatenate([q1_pi.reshape(-1,1), q2_pi.reshape(-1,1)], axis=1).min(1)
+        q1_pi = self.ac.q1(rng2, obs_tm1, params.q1)
+        q2_pi = self.ac.q2(rng3, obs_tm1, params.q2)
+        q_pi = jnp.concatenate([q1_pi.reshape(-1,self.act_dim,1), q2_pi.reshape(-1,self.act_dim,1)], axis=2).min(2)
         # Entropy-regularized policy loss
-        loss_pi = (alpha * logp_a_tm1 - q_pi).mean()
+        loss_pi = inner1d(probs, alpha * jnp.log(probs) - q_pi).mean() # Eq. 12
         return loss_pi
 
     @functools.partial(jax.jit, static_argnums=(0,))

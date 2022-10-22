@@ -103,10 +103,10 @@ def run_loop(
         dummy_action.append(env.action_space().sample(next(rng)))
     dummy_obs = jnp.asarray(dummy_obs).reshape((1, window_length, 1))
     dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
-    if use_action_history:
-        raise(NotImplementedError)
-    else:
-        dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
+    #if use_action_history:
+    #    raise(NotImplementedError)
+    #else:
+    #    dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
 
     # Replay Buffer
     buffer = ReplayBufferPO(
@@ -120,7 +120,7 @@ def run_loop(
     agent = LSTMSAC(
         rng=next(rng),
         dummy_obs_actor = dummy_obs,
-        dummy_obs_critic = dummy_obs_critic,
+        dummy_obs_critic = dummy_obs,
         obs_dim = obs_dim,
         act_dim = act_dim,
         hidden_sizes = hidden_sizes,
@@ -182,6 +182,7 @@ def run_loop(
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
+    print(f"Training time: {train_time}")
     # Save train episode returns 
     if save_rewards:
         file = 'lstm/rewards/train_rewards_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
@@ -223,6 +224,7 @@ def run_loop(
         # Collect test episode return
         tot_test_ep_returns.append(test_ep_return)
     test_time = time.time()-start_time
+    print(f"Testing time: {test_time}")
     # Save train episode returns 
     if save_rewards:
         file = 'lstm/rewards/test_rewards_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'

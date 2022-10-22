@@ -1,12 +1,12 @@
 theano-pymc==1.1.2
 pymc3==3.11.3
 arviz==0.11.4
-jax==0.2.25
+jax[cuda11_cudnn82]==0.2.25 -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 numpyro==0.8.0
 jupyter==1.0.0
 gym==0.23.1
 dm-haiku==0.0.6
 numpy==1.21.2
 optax==0.1.2
-jaxlib==0.3.7
+#jaxlib==0.3.7
 distrax==0.1.2

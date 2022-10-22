@@ -1,12 +1,15 @@
 #!/bin/bash
 
 #SBATCH -A es_chatzi
-##SBATCH -G 1
+#SBATCH -G 1
 #SBATCH -n 2
 #SBATCH --time=120:00:00
 #SBATCH --mem-per-cpu=4096
 #SBATCH --job-name=submit-gridsearch
 #SBATCH --output=transformer/gridsearch_results/output_gridsearch.txt
+
+source /cluster/apps/local/env2lmod.sh
+module load gcc/8.2.0 cuda/11.3.1 cudnn/8.2.1.32
 
 python -m transformer.run_gridsearch \
 --seed $1 \
