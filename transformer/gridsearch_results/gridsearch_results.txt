@@ -268,3 +268,7 @@ seed 698 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num
 seed 732 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 2 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True replay_size 1000000: mean -16149 std 11181
 seed 318 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 2 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True replay_size 1000000: mean -17212 std 11912
 Bug env fixed
+seed 698 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 2 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True replay_size 1000000: mean -16711 std 11484
+seed 0 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 2 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True replay_size 1000000: mean -128156 std 132341
+seed 732 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 2 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True replay_size 1000000: mean -16106 std 11108
+seed 318 train_episodes 60000 update_iterations 10 gradient_descent_epochs 1 num_heads 8 num_layers 2 hidden_sizes_mlp [100] learning_rate 0.001 alpha 0.1 polyak 0.9 keep_last_window_lenght_obs True replay_size 1000000: mean -17212 std 11912

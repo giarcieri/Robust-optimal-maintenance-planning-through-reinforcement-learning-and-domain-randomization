@@ -1,5 +1,6 @@
 import collections
 import chex
+from typing import Optional
 import distrax
 import optax
 import functools
@@ -10,6 +11,9 @@ Params = collections.namedtuple("Params", "pi q1 q2 q1_target q2_target")
 OptStates = collections.namedtuple("OptStates", "pi q1 q2")
 Memory = collections.namedtuple("Memory", "pi q1 q2 q1_target q2_target") # initialize Memory(None, None...)
 
+@jax.jit
+def inner1d(X, Y):
+  return (X * Y).sum(-1)
 
 class GTrXLActor():
     """GTrXL Policy Network"""
@@ -52,7 +56,7 @@ class GTrXLActor():
             log_pi = log_probs.max(-1)
         else:
             pi_action, log_pi = categorical_dist.sample_and_log_prob(seed=rng)
-        return pi_action, log_pi, memory
+        return pi_action, log_pi, categorical_dist.probs, memory
 
     @property
     def init_params(
@@ -75,9 +79,10 @@ class GTrXLCritic():
         dropout: float = 0.1, 
         hidden_sizes_mlp: Iterable[int] = [],
         dropouta: float = 0.0,
+        act_dim: Optional[int] = 3
     ):
         def nn_func():
-            return apply_GTrXL(dummy_obs.shape[-1], num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, 1)
+            return apply_GTrXL(dummy_obs.shape[-1], num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, act_dim)
 
         self.nn = hk.multi_transform(nn_func)
         self._init_params = self.nn.init(rng, dummy_obs)
@@ -92,14 +97,14 @@ class GTrXLCritic():
         self,
         rng: chex.PRNGKey,
         obs: jnp.ndarray,
-        act: jnp.ndarray,
+        #act: jnp.ndarray,
         params: hk.Params,
         memory: Tuple[jnp.ndarray] = None,
     ):
-        inputs = jnp.concatenate([obs, act], axis=-1)
-        dict = self.nn.apply.forward(params, rng, inputs, memory)
+        #inputs = jnp.concatenate([obs, act], axis=-1)
+        dict = self.nn.apply.forward(params, rng, obs, memory)
         q_values, memory = dict['preds'][:, -1, :], dict['memory']
-        return q_values.squeeze(), memory
+        return q_values, memory #q_values.squeeze()
 
 
 
@@ -141,6 +146,7 @@ class GTrXLActorCritic():
             dropout = dropout, 
             hidden_sizes_mlp = hidden_sizes_mlp,
             dropouta = dropout,
+            act_dim = act_dim,
         )
         self.q2 = GTrXLCritic(
             rng = rng3,
@@ -151,6 +157,7 @@ class GTrXLActorCritic():
             dropout = dropout, 
             hidden_sizes_mlp = hidden_sizes_mlp,
             dropouta = dropout,
+            act_dim = act_dim,
         )
 
     def init_params(
@@ -166,7 +173,7 @@ class GTrXLActorCritic():
         deterministic: bool = False,
         memory: Tuple[jnp.ndarray] = None,
     ):
-        action, _, memory = self.pi(rng, obs, params, deterministic, memory)
+        action, _, _, memory = self.pi(rng, obs, params, deterministic, memory)
         return action, memory
 
 class GTrXLSAC():
@@ -204,6 +211,7 @@ class GTrXLSAC():
         )
         self.optimizer = optax.adam(learning_rate)
         self.polyak = polyak
+        self.act_dim = act_dim
 
     def init_params(
         self,
@@ -230,17 +238,18 @@ class GTrXLSAC():
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
-        obs_tm1, a_tm1, r_t, discount_t, obs_t = data
+        _, _, r_t, discount_t, obs_t = data
         # sample next action
-        a_t, logp_a_t, _ = self.ac.pi(rng1, obs_t, params.pi, False, memory.pi)
+        _, _, probs, _ = self.ac.pi(rng1, obs_t, params.pi, False, memory.pi)
 
-        a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(-1, 1, 1)], axis=1)
+        #a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(-1, 1, 1)], axis=1)
 
         # Target Q-values
-        q1_targ, _ = self.ac.q1(rng2, obs_t, a_t, params.q1_target, memory.q1_target)
-        q2_targ, _ = self.ac.q2(rng3, obs_t, a_t, params.q2_target, memory.q2_target)
-        q_targ = jnp.concatenate([q1_targ.reshape(-1,1), q2_targ.reshape(-1,1)], axis=1).min(1)
-        backup = r_t + discount_t * (q_targ - alpha * logp_a_t) # for last timestep should be only r_t?
+        q1_targ, _ = self.ac.q1(rng2, obs_t, params.q1_target, memory.q1_target)
+        q2_targ, _ = self.ac.q2(rng3, obs_t, params.q2_target, memory.q2_target)
+        q_targ = jnp.concatenate([q1_targ.reshape(-1,self.act_dim,1), q2_targ.reshape(-1,self.act_dim,1)], axis=2).min(2)
+        soft_V = inner1d(probs, q_targ - alpha * jnp.log(probs)) # Eq. 10
+        backup = r_t + discount_t * soft_V 
         return jax.lax.stop_gradient(backup)
 
 
@@ -254,8 +263,9 @@ class GTrXLSAC():
         memory: Memory,
         alpha: float = 0.2,
     ):
-        obs_tm1, a_tm1, r_t, discount_t, obs_t = data
-        q1, _ = self.ac.q1(rng, obs_tm1, a_tm1, q1_params, memory.q1)
+        obs_tm1, a_tm1, _, _, _ = data
+        q1, _ = self.ac.q1(rng, obs_tm1, q1_params, memory.q1)
+        q1 = q1[:, a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, memory, alpha)
         loss = ((q1 - backup)**2).mean()
         return loss
@@ -270,8 +280,9 @@ class GTrXLSAC():
         memory: Memory,
         alpha: float = 0.2,
     ):
-        obs_tm1, a_tm1, r_t, discount_t, obs_t = data
-        q2, _ = self.ac.q2(rng, obs_tm1, a_tm1, q2_params, memory.q2)
+        obs_tm1, a_tm1, _, _, _ = data
+        q2, _ = self.ac.q2(rng, obs_tm1, q2_params, memory.q2)
+        q2 = q2[:, a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, memory, alpha)
         loss = ((q2 - backup)**2).mean()
         return loss
@@ -287,18 +298,18 @@ class GTrXLSAC():
         alpha: float = 0.2,
     ):
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
-        obs_tm1, a_history, _, _, _ = data
+        obs_tm1, _, _, _, _ = data
         # sample online a_tm1
-        a_tm1, logp_a_tm1, _ = self.ac.pi(rng1, obs_tm1, pi_params, False, memory.pi)
+        _, _, probs, _ = self.ac.pi(rng1, obs_tm1, pi_params, False, memory.pi)
 
-        a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(-1, 1, 1)], axis=1)
+        #a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(-1, 1, 1)], axis=1)
 
         # Compute Q(o,a)
-        q1_pi, _ = self.ac.q1(rng2, obs_tm1, a_tm1, params.q1, memory.q1)
-        q2_pi, _ = self.ac.q2(rng3, obs_tm1, a_tm1, params.q2, memory.q2)
-        q_pi = jnp.concatenate([q1_pi.reshape(-1,1), q2_pi.reshape(-1,1)], axis=1).min(1)
+        q1_pi, _ = self.ac.q1(rng2, obs_tm1, params.q1, memory.q1)
+        q2_pi, _ = self.ac.q2(rng3, obs_tm1, params.q2, memory.q2)
+        q_pi = jnp.concatenate([q1_pi.reshape(-1,self.act_dim,1), q2_pi.reshape(-1,self.act_dim,1)], axis=2).min(2)
         # Entropy-regularized policy loss
-        loss_pi = (alpha * logp_a_tm1 - q_pi).mean()
+        loss_pi = inner1d(probs, alpha * jnp.log(probs) - q_pi).mean() # Eq. 12
         return loss_pi
 
     @functools.partial(jax.jit, static_argnums=(0,))
@@ -315,17 +326,17 @@ class GTrXLSAC():
         obs_tm1, a_tm1, r_t, discount_t, obs_t = data
         # Update q1
         grads_q1 = jax.grad(self.loss_q1)(params.q1, params, rng1, data, memory, alpha)
-        _, memory_q1 = self.ac.q1(rng1, obs_tm1, a_tm1, params.q1, memory.q1)
+        _, memory_q1 = self.ac.q1(rng1, obs_tm1, params.q1, memory.q1)
         updates_q1, new_opt_state_q1 = self.optimizer.update(grads_q1, opt_states.q1)
         new_params_q1 = optax.apply_updates(params.q1, updates_q1)
         # Update q2
         grads_q2 = jax.grad(self.loss_q2)(params.q2, params, rng2, data, memory, alpha)
-        _, memory_q2 = self.ac.q2(rng2, obs_tm1, a_tm1, params.q2, memory.q2)
+        _, memory_q2 = self.ac.q2(rng2, obs_tm1, params.q2, memory.q2)
         updates_q2, new_opt_state_q2 = self.optimizer.update(grads_q2, opt_states.q2)
         new_params_q2 = optax.apply_updates(params.q2, updates_q2)
         # Update pi
         grads_pi = jax.grad(self.loss_pi)(params.pi, params, rng3, data, memory, alpha)
-        _, _, memory_pi = self.ac.pi(rng3, obs_tm1, params.pi, False, memory.pi)
+        _, _, _, memory_pi = self.ac.pi(rng3, obs_tm1, params.pi, False, memory.pi)
         updates_pi, new_opt_state_pi = self.optimizer.update(grads_pi, opt_states.pi)
         new_params_pi = optax.apply_updates(params.pi, updates_pi)
         # Update q1_target

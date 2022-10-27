@@ -182,7 +182,7 @@ def run_loop(
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
-    print(f"Training time: {train_time}")
+    print(f"Training time: {round(train_time/3600, 1)}h")
     # Save train episode returns 
     if save_rewards:
         file = 'lstm/rewards/train_rewards_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
@@ -224,7 +224,7 @@ def run_loop(
         # Collect test episode return
         tot_test_ep_returns.append(test_ep_return)
     test_time = time.time()-start_time
-    print(f"Testing time: {test_time}")
+    print(f"Testing time: {round(test_time/3600, 1)}h")
     # Save train episode returns 
     if save_rewards:
         file = 'lstm/rewards/test_rewards_LSTM_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'

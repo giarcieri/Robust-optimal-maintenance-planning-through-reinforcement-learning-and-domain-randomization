@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH -A es_chatzi
-#SBATCH -G 1
+##SBATCH -G 1
 #SBATCH -n 2
-#SBATCH --time=120:00:00
+#SBATCH --time=130:00:00
 #SBATCH --mem-per-cpu=4096
 #SBATCH --job-name=submit-gridsearch
 #SBATCH --output=transformer/gridsearch_results/output_gridsearch.txt

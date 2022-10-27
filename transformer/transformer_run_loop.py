@@ -107,10 +107,10 @@ def run_loop(
         dummy_action.append(env.action_space().sample(next(rng)))
     dummy_obs = jnp.asarray(dummy_obs).reshape((1, window_length, 1))
     dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
-    if use_action_history:
-        raise(NotImplementedError)
-    else:
-        dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
+    #if use_action_history:
+    #    raise(NotImplementedError)
+    #else:
+    #    dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
 
     # Replay Buffer
     buffer = ReplayBufferPO(
@@ -124,7 +124,7 @@ def run_loop(
     agent = GTrXLSAC(
         rng=next(rng),
         dummy_obs_actor = dummy_obs,
-        dummy_obs_critic = dummy_obs_critic,
+        dummy_obs_critic = dummy_obs,
         obs_dim = obs_dim,
         act_dim = act_dim,
         num_heads = num_heads, 
@@ -196,7 +196,7 @@ def run_loop(
         # Collect episode return
         tot_train_ep_returns.append(train_ep_return)
     train_time = time.time()-start_time
-    print(f"Training time: {train_time}")
+    print(f"Training time: {round(train_time/3600, 1)}h")
     # Save train episode returns 
     if save_rewards:
         file = 'transformer/rewards/train_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
@@ -240,7 +240,7 @@ def run_loop(
         # Collect test episode return
         tot_test_ep_returns.append(test_ep_return)
     test_time = time.time()-start_time
-    print(f"Testing time: {test_time}")
+    print(f"Testing time: {round(test_time/3600, 1)}h")
     # Save train episode returns 
     if save_rewards:
         file = 'transformer/rewards/test_rewards_GTrXL_' + 'seed'+str(seed) + '_' + time.strftime("%d-%m-%Y")+ '.pickle'
