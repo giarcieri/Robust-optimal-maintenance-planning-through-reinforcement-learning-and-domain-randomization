@@ -107,10 +107,10 @@ def run_loop(
     # Environment
     env = FractalEnv(reward_matrix=reward_matrix)
     dummy_obs = []
-    #dummy_action = []
+    dummy_action = []
     for _ in range(window_length):
         dummy_obs.append(env.observation_space().sample(next(rng)))
-        #dummy_action.append(env.action_space().sample(next(rng)))
+        dummy_action.append(env.action_space().sample(next(rng)))
     dummy_obs = jnp.asarray(dummy_obs).reshape((1, window_length, 1))
     dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
     if use_action_history:

@@ -39,14 +39,14 @@ class ReplayBufferPO(object):
         # observations
         #nans = jnp.full((self.window_length - 1), jnp.NINF)
         #obs_trajectory = jnp.concatenate([nans, obs_trajectory])
-        #timesteps = jnp.expand_dims(jnp.arange(self.episode_horizon), 1)
+        timesteps = jnp.expand_dims(jnp.arange(self.window_length - 1, self.episode_horizon), 1)
 
         obs_sliding_window = obs_trajectory[sub_windows] # shape (episode_horizon + 1 - window_length, window_length)
         obs_tm1_trajectory = obs_sliding_window[:-1, :] # shape (episode_horizon - window_length, window_length)
         obs_t_trajectory = obs_sliding_window[1:, :] # shape (episode_horizon - window_length, window_length)
 
-        #obs_tm1_trajectory = jnp.concatenate([obs_tm1_trajectory, timesteps[:-1]], axis=1)
-        #obs_t_trajectory = jnp.concatenate([obs_t_trajectory, timesteps[1:]], axis=1)
+        obs_tm1_trajectory = jnp.concatenate([obs_tm1_trajectory, timesteps[:-1]], axis=1)
+        obs_t_trajectory = jnp.concatenate([obs_t_trajectory, timesteps[1:]], axis=1)
 
         # actions 
         #action_sliding_window = action_trajectory[sub_windows]
@@ -64,11 +64,11 @@ class ReplayBufferPO(object):
 
     def batch_sample(self, idxs):
         obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch = jax.vmap(self.sample)(idxs)
-        obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length, 1)
+        obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length + 1, 1)
         a_tm1_batch = a_tm1_batch.reshape(-1,)
         r_t_batch = r_t_batch.reshape(-1,)
         discount_t_batch = discount_t_batch.reshape(-1,)
-        obs_t_batch = obs_t_batch.reshape(-1, self.window_length, 1)
+        obs_t_batch = obs_t_batch.reshape(-1, self.window_length + 1, 1)
         return (obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch)
 
 
@@ -119,7 +119,7 @@ def run_loop(
     #    dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
 
     # add timestep
-    #dummy_obs = jnp.concatenate([dummy_obs, jnp.array([1])], axis=1)
+    dummy_obs = jnp.concatenate([dummy_obs, jnp.array([1.]).reshape(1,1,1)], axis=1)
 
     # Replay Buffer
     buffer = ReplayBufferPO(
@@ -167,7 +167,7 @@ def run_loop(
                 obs_tm1_history = obs_tm1_full_history[:, step-window_length+1:step+1, :]
 
             # add timestep
-            #obs_tm1_history = jnp.concatenate([obs_tm1_history, jnp.array([step])], axis=1)
+            obs_tm1_history = jnp.concatenate([obs_tm1_history, jnp.array([step]).reshape(1,1,1)], axis=1)
 
             a_tm1 = agent.get_action(
                 rng = next(rng),
@@ -180,7 +180,7 @@ def run_loop(
             buffer.push(obs=obs_tm1, action=a_tm1, reward=r_t, episode=train_episode, step=step)
             #print(f'Episode {train_episode} Step {step}: o_tm1 {obs_tm1.round(2)}, hs_tm1 {hs_tm1}, a_tm1 {a_tm1}, r_t {r_t}')
             obs_tm1, hs_tm1 = obs_t, hs_t
-        #print(f'Episode {train_episode} total return {train_ep_return}')
+        print(f'Episode {train_episode} total return {train_ep_return}')
         # Update
         if train_episode >= update_after and train_episode % update_every == 0:
             #with open("lstm/logs.txt", "a") as f:
@@ -229,7 +229,7 @@ def run_loop(
                 obs_history = obs_full_history[:, step-window_length+1:step+1, :]
 
             # add timestep
-            #obs_history = jnp.concatenate([obs_history, jnp.array([step])], axis=1)
+            obs_history = jnp.concatenate([obs_history, jnp.array([step]).reshape(1,1,1)], axis=1)
 
             a = agent.get_action(
                 rng = next(rng),
@@ -237,10 +237,10 @@ def run_loop(
                 obs = obs_history,
                 deterministic = True,
             )
-            #print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
+            print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
             obs, hs, r, _, _ = env.step(next(rng), hs, obs, a.squeeze(), env_params)
             test_ep_return += r
-            #print(f'Episode {test_episode} Step {step}: r_t {r}')
+            print(f'Episode {test_episode} Step {step}: r_t {r}')
         #print(f'Episode {test_episode} total return {test_ep_return}')
         # Collect test episode return
         tot_test_ep_returns.append(test_ep_return)
