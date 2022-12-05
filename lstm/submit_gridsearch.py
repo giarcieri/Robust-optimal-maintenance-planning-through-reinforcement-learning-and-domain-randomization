@@ -3,11 +3,11 @@ import subprocess
 
 params = {
     "seed": [0, 732, 100, 29],
-    "train_episodes": [60000], 
+    "train_episodes": [20000, 40000, 70000], 
     "test_episodes": [500], 
     "update_iterations": [10],
     "gradient_descent_epochs": [10],
-    "hidden_sizes": [[100, 100, 100]],
+    "hidden_sizes": [[100, 100, 100], [200, 200, 200]],
     "learning_rate": [1e-3],
     "alpha": [0.1], 
     "save_rewards": [False],
@@ -40,6 +40,6 @@ for i, combo in enumerate(combinations):
         inputs.append(f'--{v}')
         inputs.append(str(x))
     command = ['bsub'] + ['-o'] + ['lstm/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
-     ['180:00'] + ['-R'] + ['rusage[mem=8192]'] + ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
+     ['300:00'] + ['-R'] + ['rusage[mem=8192]'] + ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
     #command = ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
     out = subprocess.run(command)

@@ -215,7 +215,8 @@ class LSTMSAC():
         alpha: float = 0.2,
     ):
         obs_tm1, a_tm1, _, _, _ = data
-        q1 = self.ac.q1(rng, obs_tm1, q1_params)[:, a_tm1.astype(int)]
+        q1 = self.ac.q1(rng, obs_tm1, q1_params)
+        q1 = q1[jnp.arange(q1.shape[0]), a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, alpha)
         loss = ((q1 - backup)**2).mean()
         return loss
@@ -230,7 +231,8 @@ class LSTMSAC():
         alpha: float = 0.2,
     ):
         obs_tm1, a_tm1, _, _, _ = data
-        q2 = self.ac.q2(rng, obs_tm1, q2_params)[:, a_tm1.astype(int)]
+        q2 = self.ac.q2(rng, obs_tm1, q2_params)
+        q2 = q2[jnp.arange(q2.shape[0]), a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, alpha)
         loss = ((q2 - backup)**2).mean()
         return loss

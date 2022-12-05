@@ -265,7 +265,7 @@ class GTrXLSAC():
     ):
         obs_tm1, a_tm1, _, _, _ = data
         q1, _ = self.ac.q1(rng, obs_tm1, q1_params, memory.q1)
-        q1 = q1[:, a_tm1.astype(int)]
+        q1 = q1[jnp.arange(q1.shape[0]), a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, memory, alpha)
         loss = ((q1 - backup)**2).mean()
         return loss
@@ -282,7 +282,7 @@ class GTrXLSAC():
     ):
         obs_tm1, a_tm1, _, _, _ = data
         q2, _ = self.ac.q2(rng, obs_tm1, q2_params, memory.q2)
-        q2 = q2[:, a_tm1.astype(int)]
+        q2 = q2[jnp.arange(q2.shape[0]), a_tm1.astype(int)]
         backup = self.bellman_backup(rng, data, params, memory, alpha)
         loss = ((q2 - backup)**2).mean()
         return loss

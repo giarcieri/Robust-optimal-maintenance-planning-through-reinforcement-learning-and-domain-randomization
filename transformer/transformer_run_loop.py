@@ -40,12 +40,17 @@ class ReplayBufferPO(object):
         obs_sliding_window = obs_trajectory[sub_windows] # shape (episode_horizon + 1 - window_length, window_length)
         obs_tm1_trajectory = obs_sliding_window[:-1, :] # shape (episode_horizon - window_length, window_length)
         obs_t_trajectory = obs_sliding_window[1:, :] # shape (episode_horizon - window_length, window_length)
+        
         # actions 
-        action_sliding_window = action_trajectory[sub_windows]
-        a_tm1_trajectory = action_sliding_window[:-1, :]
+        #action_sliding_window = action_trajectory[sub_windows]
+        #a_tm1_trajectory = action_sliding_window[:-1, :]
+        a_tm1_trajectory = action_trajectory[self.window_length-1:-1]
+        
         # rewards
-        rewards_sliding_window = reward_trajectory[sub_windows]
-        r_t_trajectory = rewards_sliding_window[1:, -1]
+        #rewards_sliding_window = reward_trajectory[sub_windows]
+        #r_t_trajectory = rewards_sliding_window[1:, -1]
+        r_t_trajectory = reward_trajectory[self.window_length:]
+        
         # discounts
         discount_t_trajectory = jnp.zeros(r_t_trajectory.shape) + self.gamma
         return (obs_tm1_trajectory, a_tm1_trajectory, r_t_trajectory, discount_t_trajectory, obs_t_trajectory)
@@ -53,7 +58,7 @@ class ReplayBufferPO(object):
     def batch_sample(self, idxs):
         obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch = jax.vmap(self.sample)(idxs)
         obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length, 1)
-        a_tm1_batch = a_tm1_batch.reshape(-1, self.window_length, 1)
+        a_tm1_batch = a_tm1_batch.reshape(-1,)
         r_t_batch = r_t_batch.reshape(-1,)
         discount_t_batch = discount_t_batch.reshape(-1,)
         obs_t_batch = obs_t_batch.reshape(-1, self.window_length, 1)
@@ -101,12 +106,12 @@ def run_loop(
     # Environment
     env = FractalEnv(reward_matrix=reward_matrix)
     dummy_obs = []
-    dummy_action = []
+    #dummy_action = []
     for _ in range(window_length):
         dummy_obs.append(env.observation_space().sample(next(rng)))
-        dummy_action.append(env.action_space().sample(next(rng)))
+        #dummy_action.append(env.action_space().sample(next(rng)))
     dummy_obs = jnp.asarray(dummy_obs).reshape((1, window_length, 1))
-    dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
+    #dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
     #if use_action_history:
     #    raise(NotImplementedError)
     #else:
