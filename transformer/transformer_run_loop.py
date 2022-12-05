@@ -42,14 +42,14 @@ class ReplayBufferPO(object):
         obs_t_trajectory = obs_sliding_window[1:, :] # shape (episode_horizon - window_length, window_length)
         
         # actions 
-        #action_sliding_window = action_trajectory[sub_windows]
-        #a_tm1_trajectory = action_sliding_window[:-1, :]
-        a_tm1_trajectory = action_trajectory[self.window_length-1:-1]
+        action_sliding_window = action_trajectory[sub_windows]
+        a_tm1_trajectory = action_sliding_window[:-1, :]
+        #a_tm1_trajectory = action_trajectory[self.window_length-1:-1]
         
         # rewards
-        #rewards_sliding_window = reward_trajectory[sub_windows]
-        #r_t_trajectory = rewards_sliding_window[1:, -1]
-        r_t_trajectory = reward_trajectory[self.window_length:]
+        rewards_sliding_window = reward_trajectory[sub_windows]
+        r_t_trajectory = rewards_sliding_window[1:, -1]
+        #r_t_trajectory = reward_trajectory[self.window_length:]
         
         # discounts
         discount_t_trajectory = jnp.zeros(r_t_trajectory.shape) + self.gamma
@@ -58,7 +58,8 @@ class ReplayBufferPO(object):
     def batch_sample(self, idxs):
         obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch = jax.vmap(self.sample)(idxs)
         obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length, 1)
-        a_tm1_batch = a_tm1_batch.reshape(-1,)
+        a_tm1_batch = a_tm1_batch.reshape(-1, self.window_length, 1)
+        #a_tm1_batch = a_tm1_batch.reshape(-1,)
         r_t_batch = r_t_batch.reshape(-1,)
         discount_t_batch = discount_t_batch.reshape(-1,)
         obs_t_batch = obs_t_batch.reshape(-1, self.window_length, 1)
@@ -111,11 +112,11 @@ def run_loop(
         dummy_obs.append(env.observation_space().sample(next(rng)))
         #dummy_action.append(env.action_space().sample(next(rng)))
     dummy_obs = jnp.asarray(dummy_obs).reshape((1, window_length, 1))
-    #dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
-    #if use_action_history:
-    #    raise(NotImplementedError)
-    #else:
-    #    dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
+    dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
+    if use_action_history:
+        raise(NotImplementedError)
+    else:
+        dummy_obs_critic = jnp.concatenate([dummy_obs, dummy_action], axis=-1)
 
     # Replay Buffer
     buffer = ReplayBufferPO(
@@ -129,7 +130,7 @@ def run_loop(
     agent = GTrXLSAC(
         rng=next(rng),
         dummy_obs_actor = dummy_obs,
-        dummy_obs_critic = dummy_obs,
+        dummy_obs_critic = dummy_obs_critic,
         obs_dim = obs_dim,
         act_dim = act_dim,
         num_heads = num_heads, 
