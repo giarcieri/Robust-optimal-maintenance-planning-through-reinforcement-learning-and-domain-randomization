@@ -1,4 +1,5 @@
 #bsub -o "lstm/gridsearch_results/output_gridsearch.txt" -n 1 -R "rusage[mem=2048]" python -m lstm.submit_gridsearch
+#sbatch -o "lstm/gridsearch_results/output_gridsearch.txt" -n 1 --mem-per-cpu=2048 --wrap "python -m lstm.submit_gridsearch"
 import subprocess
 
 params = {
@@ -35,11 +36,12 @@ for v0 in params['seed']:
                                                     combinations.append([v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12])
 
 for i, combo in enumerate(combinations):
-    inputs = []
-    for v, x in zip(params.keys(), combo):
-        inputs.append(f'--{v}')
-        inputs.append(str(x))
-    command = ['bsub'] + ['-o'] + ['lstm/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
-     ['400:00'] + ['-R'] + ['rusage[mem=8192]'] + ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
+    #inputs = []
+    #for v, x in zip(params.keys(), combo):
+    #    inputs.append(f'--{v}')
+    #    inputs.append(str(x))
+    #command = ['bsub'] + ['-o'] + ['lstm/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
+    # ['400:00'] + ['-R'] + ['rusage[mem=8192]'] + ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
+    command = ['sbatch'] + ['lstm/submit_gridsearch.sh'] + [str(x) for x in combo] 
     #command = ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
     out = subprocess.run(command)
