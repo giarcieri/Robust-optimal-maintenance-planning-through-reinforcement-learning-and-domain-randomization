@@ -3,7 +3,7 @@
 #SBATCH -A es_chatzi
 ##SBATCH -G 1
 #SBATCH -n 2
-#SBATCH --time=200:00:00
+#SBATCH --time=150:00:00
 #SBATCH --mem-per-cpu=4096
 #SBATCH --job-name=transformer-submit-gridsearch
 #SBATCH --output=transformer/gridsearch_results/output_gridsearch.txt

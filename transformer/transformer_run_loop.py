@@ -20,6 +20,7 @@ class ReplayBufferPO(object):
         self.episode_horizon = episode_horizon
         self.window_length = window_length
         self.gamma = gamma
+        self.timesteps = jnp.arange(episode_horizon)
 
     def push(self, obs, action, reward, episode, step):
         self.size_buffer = min(episode+1, self.capacity)
@@ -36,6 +37,9 @@ class ReplayBufferPO(object):
             jnp.expand_dims(jnp.arange(self.window_length), 0) +
             jnp.expand_dims(jnp.arange(self.episode_horizon + 1 - self.window_length), 0).T
         )
+        # timesteps
+        timesteps = self.timesteps[sub_windows] # shape (episode_horizon + 1 - window_length, window_length)
+
         # observations
         obs_sliding_window = obs_trajectory[sub_windows] # shape (episode_horizon + 1 - window_length, window_length)
         obs_tm1_trajectory = obs_sliding_window[:-1, :] # shape (episode_horizon - window_length, window_length)
@@ -53,16 +57,21 @@ class ReplayBufferPO(object):
         
         # discounts
         discount_t_trajectory = jnp.zeros(r_t_trajectory.shape) + self.gamma
-        return (obs_tm1_trajectory, a_tm1_trajectory, r_t_trajectory, discount_t_trajectory, obs_t_trajectory)
+        return (obs_tm1_trajectory, a_tm1_trajectory, r_t_trajectory, discount_t_trajectory, obs_t_trajectory, timesteps)
 
     def batch_sample(self, idxs):
-        obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch = jax.vmap(self.sample)(idxs)
+        obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch, timesteps = jax.vmap(self.sample)(idxs)
+        # timesteps shape (batch, episode_horizon - window_length + 1, window_length)
+        timesteps_tm1 = timesteps[:, :-1, :].reshape(-1, self.window_length, 1)
+        timesteps_t = timesteps[:, 1:, :].reshape(-1, self.window_length, 1)
         obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length, 1)
+        obs_tm1_batch = jnp.concatenate([obs_tm1_batch, timesteps_tm1], axis=-1)
         a_tm1_batch = a_tm1_batch.reshape(-1, self.window_length, 1)
         #a_tm1_batch = a_tm1_batch.reshape(-1,)
         r_t_batch = r_t_batch.reshape(-1,)
         discount_t_batch = discount_t_batch.reshape(-1,)
         obs_t_batch = obs_t_batch.reshape(-1, self.window_length, 1)
+        obs_t_batch = jnp.concatenate([obs_t_batch, timesteps_t], axis=-1)
         return (obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch)
 
 
@@ -93,7 +102,7 @@ def run_loop(
     num_layers: int = 2, 
     dropout: float = 0.1, 
     hidden_sizes_mlp: Tuple[int] = [],
-    dropouta: float = 0.0,
+    dropouta: float = 0.1,
     learning_rate: float = 1e-3,
     polyak: float = 0.995,
     alpha: float = 0.2,
@@ -113,6 +122,9 @@ def run_loop(
         dummy_action.append(env.action_space().sample(next(rng)))
     dummy_obs = jnp.asarray(dummy_obs).reshape((1, window_length, 1))
     dummy_action = jnp.asarray(dummy_action).reshape((1, window_length, 1))
+    # add timestep
+    dummy_timestep = jnp.arange(window_length).reshape(1, window_length, 1)
+    dummy_obs = jnp.concatenate([dummy_obs, dummy_timestep], axis=-1)
     if use_action_history:
         raise(NotImplementedError)
     else:
@@ -164,10 +176,17 @@ def run_loop(
             if keep_last_window_lenght_obs:
                 if step < window_length:
                     obs_tm1_history = obs_tm1_full_history[:, :step+1, :]
+                    timestep = jnp.arange(step+1).reshape(1,-1,1)
                 else:
                     obs_tm1_history = obs_tm1_full_history[:, step-window_length+1:step+1, :]
+                    timestep = jnp.arange(step-window_length+1,step+1).reshape(1,-1,1)
             else:
                 obs_tm1_history = obs_tm1_full_history[:, :step+1, :]
+                timestep = jnp.arange(step+1).reshape(1,-1,1)
+
+            # add timestep
+            obs_tm1_history = jnp.concatenate([obs_tm1_history, timestep], axis=-1)
+
             a_tm1, memory_pi_tm1 = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
@@ -227,10 +246,17 @@ def run_loop(
             if keep_last_window_lenght_obs:
                 if step < window_length:
                     obs_history = obs_full_history[:, :step+1, :]
+                    timestep = jnp.arange(step+1).reshape(1,-1,1)
                 else:
                     obs_history = obs_full_history[:, step-window_length+1:step+1, :]
+                    timestep = jnp.arange(step-window_length+1,step+1).reshape(1,-1,1)
             else:
                 obs_history = obs_full_history[:, :step+1, :]
+                timestep = jnp.arange(step+1).reshape(1,-1,1)
+
+            # add timestep
+            obs_history = jnp.concatenate([obs_history, timestep], axis=-1)
+
             a, memory_tm1 = agent.get_action(
                 rng = next(rng),
                 params = agent_params,
@@ -238,11 +264,11 @@ def run_loop(
                 memory_pi_tm1 = memory_tm1,
                 deterministic = True,
             )
-            #print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
+            print(f'Episode {test_episode} Step {step}: o_tm1 {obs.round(2)}, hs_tm1 {hs}, a_tm1 {a}')
             obs, hs, r, _, _ = env.step(next(rng), hs, obs, a.squeeze(), env_params)
             test_ep_return += r
-            #print(f'Episode {test_episode} Step {step}: r_t {r}')
-        #print(f'Episode {test_episode} total return {test_ep_return}')
+            print(f'Episode {test_episode} Step {step}: r_t {r}')
+        print(f'Episode {test_episode} total return {test_ep_return}')
         # Collect test episode return
         tot_test_ep_returns.append(test_ep_return)
     test_time = time.time()-start_time

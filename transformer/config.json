@@ -18,7 +18,7 @@
     "act_dim": 3,
     "num_heads": 8, 
     "key_size": 64, 
-    "num_layers": 8,
+    "num_layers": 2,
     "dropout": 0.1, 
     "hidden_sizes_mlp": [100],
     "dropouta": 0.0,

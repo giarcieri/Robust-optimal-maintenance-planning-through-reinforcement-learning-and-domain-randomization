@@ -4,7 +4,7 @@ import subprocess
 
 params = {
     "seed": [0, 732, 318, 698],
-    "train_episodes": [60000, 80000, 100000], #10000
+    "train_episodes": [10000, 20000, 40000, 60000, 80000], #10000
     "test_episodes": [500], #500
     "update_iterations": [10], #[1, 10]
     "gradient_descent_epochs": [1], #[1, 10]
@@ -12,7 +12,7 @@ params = {
     "num_layers": [2], #[2, 4, 8]
     "hidden_sizes_mlp": [[100]], #[[], [100], [100, 100]]
     "learning_rate": [1e-3], #[1e-3, 5e-4, 1e-4]
-    "alpha": [0.1],  #[0.2, 0.1]
+    "alpha": [0.1, 1.],  #[0.2, 0.1]
     "save_rewards": [False],
     "save_model": [False],
     "gridsearch": [True],

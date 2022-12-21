@@ -1,8 +1,11 @@
 import argparse
-import pickle
 import ast
-from .lstm_run_loop import *
+import pickle
+
 from jax.lib import xla_bridge
+
+from .lstm_run_loop import *
+
 
 parser = argparse.ArgumentParser(description='rlfr')
 parser.add_argument('-i', '--seed', type=int, metavar='',
