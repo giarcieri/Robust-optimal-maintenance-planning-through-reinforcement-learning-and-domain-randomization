@@ -246,7 +246,7 @@ def run_loop(
 
 
             # add timestep
-            obs_tm1_history = jnp.concatenate([obs_tm1_history, timestep], axis=-1)
+            obs_history = jnp.concatenate([obs_history, timestep], axis=-1)
 
             a = agent.get_action(
                 rng = next(rng),
