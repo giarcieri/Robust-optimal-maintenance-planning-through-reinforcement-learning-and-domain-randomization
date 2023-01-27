@@ -31,7 +31,6 @@ class GTrXLActor():
         dropouta: float = 0.0,
         #name: Optional[str] = None
     ):
-        #super().__init__(name)
 
         def nn_func():
             return apply_GTrXL(dummy_obs.shape[-1], num_heads, key_size, num_layers, dropout, hidden_sizes_mlp, dropouta, act_dim)

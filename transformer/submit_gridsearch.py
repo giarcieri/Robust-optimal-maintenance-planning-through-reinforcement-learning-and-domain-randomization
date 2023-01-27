@@ -42,13 +42,6 @@ for v0 in params['seed']:
                                                                 combinations.append([v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15])
 
 for i, combo in enumerate(combinations):
-    #inputs = []
-    #for v, x in zip(params.keys(), combo):
-    #    inputs.append(f'--{v}')
-    #    inputs.append(f'{x}')
-    #command = ['bsub'] + ['-o'] + ['transformer/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
-    # ['100:00'] + ['-R'] + ['rusage[mem=4096]'] + ['python'] + ['-m'] + ['transformer.run_gridsearch'] + inputs
-    #inputs = {f'{v}': x for v, x in zip(params.keys(), combo)}
     command = ['sbatch'] + ['transformer/submit_gridsearch.sh'] + [str(x) for x in combo] 
     #command = ['python'] + ['-m'] + ['transformer.run_gridsearch'] + inputs
     out = subprocess.run(command)

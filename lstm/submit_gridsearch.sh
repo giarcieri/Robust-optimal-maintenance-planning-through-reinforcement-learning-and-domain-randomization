@@ -11,8 +11,6 @@
 #source /cluster/apps/local/env2lmod.sh
 #module load gcc/8.2.0 cuda/11.3.1 cudnn/8.2.1.32
 
-echo $@
-echo $6
 python -m lstm.run_gridsearch \
 --seed $1 \
 --train_episodes $2 \

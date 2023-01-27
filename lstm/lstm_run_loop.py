@@ -35,33 +35,18 @@ class ReplayBufferPO(object):
         sub_windows = (
             jnp.expand_dims(jnp.arange(self.window_length), 0) +
             jnp.expand_dims(jnp.arange(self.episode_horizon + 1 - self.window_length), 0).T
-            #jnp.expand_dims(jnp.arange(self.episode_horizon), 0).T
         )
         # timesteps
         timesteps = self.timesteps[sub_windows] # shape (episode_horizon + 1 - window_length, window_length)
-        #timesteps_tm1 = timesteps[:-1, :] # shape (episode_horizon - window_length, window_length)
-        #timesteps_t = timesteps[1:, :] # shape (episode_horizon - window_length, window_length)
-
-        # observations
-        #nans = jnp.full((self.window_length - 1), jnp.NINF)
-        #obs_trajectory = jnp.concatenate([nans, obs_trajectory])
-        #timesteps = jnp.expand_dims(jnp.arange(self.window_length - 1, self.episode_horizon), 1)
 
         obs_sliding_window = obs_trajectory[sub_windows] # shape (episode_horizon + 1 - window_length, window_length)
         obs_tm1_trajectory = obs_sliding_window[:-1, :] # shape (episode_horizon - window_length, window_length)
         obs_t_trajectory = obs_sliding_window[1:, :] # shape (episode_horizon - window_length, window_length)
 
-        #obs_tm1_trajectory = jnp.concatenate([obs_tm1_trajectory, timesteps[:-1]], axis=1)
-        #obs_t_trajectory = jnp.concatenate([obs_t_trajectory, timesteps[1:]], axis=1)
-
         # actions 
-        #action_sliding_window = action_trajectory[sub_windows]
-        #a_tm1_trajectory = action_sliding_window[:-1, :]
         a_tm1_trajectory = action_trajectory[self.window_length-1:-1]
 
         # rewards
-        #rewards_sliding_window = reward_trajectory[sub_windows]
-        #r_t_trajectory = rewards_sliding_window[1:, -1]
         r_t_trajectory = reward_trajectory[self.window_length:]
 
         # discounts
@@ -70,7 +55,6 @@ class ReplayBufferPO(object):
 
     def batch_sample(self, idxs):
         obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch, timesteps = jax.vmap(self.sample)(idxs)
-        # timesteps shape (batch, episode_horizon - window_length + 1, window_length)
         timesteps_tm1 = timesteps[:, :-1, :].reshape(-1, self.window_length, 1)
         timesteps_t = timesteps[:, 1:, :].reshape(-1, self.window_length, 1)
         obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length, 1)
@@ -167,8 +151,6 @@ def run_loop(
         else:
             env_params = sample_mean_params(trace)
         obs_tm1, hs_tm1 = env.reset(next(rng), env_params)
-        # start at hs 0 to initially limit variance
-        #hs_tm1 = jnp.array(0)
         obs_tm1_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_tm1_full_history = obs_tm1_full_history.at[:, step, :].set(obs_tm1)
@@ -231,8 +213,6 @@ def run_loop(
         else:
             env_params = sample_mean_params(trace)
         obs, hs = env.reset(next(rng), env_params)
-        # start at hs 0 to initially limit variance
-        #hs = jnp.array(0)
         obs_full_history = jnp.full((1, step_per_episode, 1), jnp.NINF)
         for step in range(step_per_episode):
             obs_full_history = obs_full_history.at[:, step, :].set(obs)

@@ -48,12 +48,10 @@ class ReplayBufferPO(object):
         # actions 
         action_sliding_window = action_trajectory[sub_windows]
         a_tm1_trajectory = action_sliding_window[:-1, :]
-        #a_tm1_trajectory = action_trajectory[self.window_length-1:-1]
         
         # rewards
         rewards_sliding_window = reward_trajectory[sub_windows]
         r_t_trajectory = rewards_sliding_window[1:, -1]
-        #r_t_trajectory = reward_trajectory[self.window_length:]
         
         # discounts
         discount_t_trajectory = jnp.zeros(r_t_trajectory.shape) + self.gamma
@@ -61,13 +59,11 @@ class ReplayBufferPO(object):
 
     def batch_sample(self, idxs):
         obs_tm1_batch, a_tm1_batch, r_t_batch, discount_t_batch, obs_t_batch, timesteps = jax.vmap(self.sample)(idxs)
-        # timesteps shape (batch, episode_horizon - window_length + 1, window_length)
         timesteps_tm1 = timesteps[:, :-1, :].reshape(-1, self.window_length, 1)
         timesteps_t = timesteps[:, 1:, :].reshape(-1, self.window_length, 1)
         obs_tm1_batch = obs_tm1_batch.reshape(-1, self.window_length, 1)
         obs_tm1_batch = jnp.concatenate([obs_tm1_batch, timesteps_tm1], axis=-1)
         a_tm1_batch = a_tm1_batch.reshape(-1, self.window_length, 1)
-        #a_tm1_batch = a_tm1_batch.reshape(-1,)
         r_t_batch = r_t_batch.reshape(-1,)
         discount_t_batch = discount_t_batch.reshape(-1,)
         obs_t_batch = obs_t_batch.reshape(-1, self.window_length, 1)

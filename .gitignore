@@ -134,3 +134,7 @@ fractal_env.py
 bayesian_lstm.py
 *.ipynb
 *.pickle
+output.txt
+logs.txt
+gridsearch_results.txt
+output_gridsearch.txt

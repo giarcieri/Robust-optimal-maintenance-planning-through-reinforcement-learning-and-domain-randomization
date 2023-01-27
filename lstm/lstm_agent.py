@@ -82,12 +82,10 @@ class LSTMCritic():
         self,
         rng: chex.PRNGKey,
         obs: jnp.ndarray,
-        #act: jnp.ndarray,
         params: hk.Params,
     ):
-        #inputs = jnp.concatenate([obs, act], axis=-1)
-        q_values = self.nn.apply.forward(params, rng, obs)#[:, act]
-        return q_values#.squeeze()
+        q_values = self.nn.apply.forward(params, rng, obs)
+        return q_values
 
 
 
@@ -191,10 +189,7 @@ class LSTMSAC():
         rng1, rng2, rng3 = jax.random.split(rng, num=3)
         _, _, r_t, discount_t, obs_t = data
         # sample next action
-        #a_t, logp_a_t = self.ac.pi(rng1, obs_t, params.pi, False)
         _, _, probs = self.ac.pi(rng1, obs_t, params.pi, False)
-
-        #a_t = jnp.concatenate([a_tm1[:, 1:, :], a_t.reshape(-1, 1, 1)], axis=1)
 
         # Target Q-values
         q1_targ = self.ac.q1(rng2, obs_t, params.q1_target)
@@ -250,8 +245,6 @@ class LSTMSAC():
         obs_tm1, _, _, _, _ = data
         # sample online a_tm1
         _, _, probs = self.ac.pi(rng1, obs_tm1, pi_params, False)
-
-        #a_tm1 = jnp.concatenate([a_history[:, 1:, :], a_tm1.reshape(-1, 1, 1)], axis=1)
 
         # Compute Q(o,a)
         q1_pi = self.ac.q1(rng2, obs_tm1, params.q1)
