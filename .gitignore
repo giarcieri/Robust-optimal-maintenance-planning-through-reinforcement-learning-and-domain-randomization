@@ -136,5 +136,9 @@ bayesian_lstm.py
 *.pickle
 output.txt
 logs.txt
-gridsearch_results.txt
-output_gridsearch.txt
+lstm/gridsearch_results/gridsearch_results.txt
+lstm/gridsearch_results/output_gridsearch.txt
+lstm/logs.txt
+transformer/gridsearch_results/gridsearch_results.txt
+transformer/gridsearch_results/output_gridsearch.txt
+transformer/logs.txt
