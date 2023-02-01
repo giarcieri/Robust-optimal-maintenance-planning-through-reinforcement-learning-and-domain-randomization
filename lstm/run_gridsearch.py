@@ -31,6 +31,8 @@ parser.add_argument('-pk', '--polyak', type=float, metavar='',
                     required=True)
 parser.add_argument('-rs', '--replay_size', type=int, metavar='',
                     required=True)
+parser.add_argument('-wl', '--window_length', type=int, metavar='',
+                    required=True)
 args = parser.parse_args()
 
 
@@ -60,5 +62,5 @@ reward_matrix = jnp.asarray([
 
 print("Running on", xla_bridge.get_backend().platform)
 
-run_loop(trace=trace, reward_matrix=reward_matrix, domain_randomization=False, window_length=5, 
+run_loop(trace=trace, reward_matrix=reward_matrix, domain_randomization=False, 
         domain_randomization_test=False, **config)

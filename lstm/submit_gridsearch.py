@@ -4,18 +4,19 @@ import subprocess
 
 params = {
     "seed": [0, 732, 100, 29],
-    "train_episodes": [10000, 20000, 40000, 60000, 80000], 
+    "train_episodes": [60000], 
     "test_episodes": [500], 
     "update_iterations": [10],
     "gradient_descent_epochs": [10],
     "hidden_sizes": [[100, 100, 100]],
     "learning_rate": [1e-3],
-    "alpha": [0.1, 1., 10., 100], 
+    "alpha": [0.1], 
     "save_rewards": [False],
     "save_model": [False],
     "gridsearch": [True],
-    "polyak": [0.995, 0.8],
-    "replay_size": [int(1e6)]
+    "polyak": [0.995],
+    "replay_size": [int(1e6)],
+    "window_length": [2, 3, 4, 5, 10],
 }
 
 # Create all possible permutations
@@ -33,7 +34,8 @@ for v0 in params['seed']:
                                         for v10 in params['gridsearch']:
                                             for v11 in params['polyak']:
                                                 for v12 in params['replay_size']:
-                                                    combinations.append([v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12])
+                                                    for v13 in params['window_length']:
+                                                        combinations.append([v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13])
 
 for i, combo in enumerate(combinations):
     inputs = []
@@ -41,7 +43,7 @@ for i, combo in enumerate(combinations):
         inputs.append(f'--{v}')
         inputs.append(str(x))
     command = ['bsub'] + ['-o'] + ['lstm/gridsearch_results/output_gridsearch.txt'] + ['-n'] + ['2'] + ['-W'] + \
-     ['360:00'] + ['-R'] + ['rusage[mem=8192]'] + ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
+     ['300:00'] + ['-R'] + ['rusage[mem=8192]'] + ['python'] + ['-m'] + ['lstm.run_gridsearch'] + inputs
     #command = ['sbatch'] + ['lstm/submit_gridsearch.sh'] + [str(x) for x in combo] 
     #command = ['bash'] + ['lstm/submit_gridsearch.sh'] + [str(x) for x in combo] 
     out = subprocess.run(command)
